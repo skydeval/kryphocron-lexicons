@@ -1,0 +1,53 @@
+{
+  "lock_version": "1.0.0",
+  "lexicons": {
+    "tools.kryphocron.feed.postPublic": {
+      "tier_locked": "public",
+      "deprecated_in_locked": null,
+      "successor_locked": null,
+      "first_seen_in_lexicon_set_version": "0.1.0"
+    },
+    "tools.kryphocron.feed.postPrivate": {
+      "tier_locked": "private",
+      "deprecated_in_locked": null,
+      "successor_locked": null,
+      "first_seen_in_lexicon_set_version": "0.1.0"
+    },
+    "tools.kryphocron.feed.like": {
+      "tier_locked": "public",
+      "deprecated_in_locked": null,
+      "successor_locked": null,
+      "first_seen_in_lexicon_set_version": "0.1.0"
+    },
+    "tools.kryphocron.feed.repost": {
+      "tier_locked": "public",
+      "deprecated_in_locked": null,
+      "successor_locked": null,
+      "first_seen_in_lexicon_set_version": "0.1.0"
+    },
+    "tools.kryphocron.feed.threadgate": {
+      "tier_locked": "public",
+      "deprecated_in_locked": null,
+      "successor_locked": null,
+      "first_seen_in_lexicon_set_version": "0.1.0"
+    },
+    "tools.kryphocron.graph.block": {
+      "tier_locked": "private",
+      "deprecated_in_locked": null,
+      "successor_locked": null,
+      "first_seen_in_lexicon_set_version": "0.1.0"
+    },
+    "tools.kryphocron.graph.mute": {
+      "tier_locked": "private",
+      "deprecated_in_locked": null,
+      "successor_locked": null,
+      "first_seen_in_lexicon_set_version": "0.1.0"
+    },
+    "tools.kryphocron.policy.audience": {
+      "tier_locked": "private",
+      "deprecated_in_locked": null,
+      "successor_locked": null,
+      "first_seen_in_lexicon_set_version": "0.1.0"
+    }
+  }
+}

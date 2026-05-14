@@ -1,0 +1,84 @@
+[package]
+name = "kryphocron-lexicons"
+version = "0.1.0-phase2"
+edition = "2024"
+rust-version = "1.85"
+license = "CC0-1.0"
+description = "Lexicon JSON resources, codegen-produced Rust types, and the build-time registry for the kryphocron substrate."
+keywords = ["atproto", "lexicon", "kryphocron"]
+categories = ["development-tools"]
+publish = false
+
+# Phase 2 manifest. §9.8 splits the kryphocron-lexicons license:
+# Rust code (codegen wrappers, build.rs, lib.rs) under
+# AGPL-3.0-or-later; lexicon JSON under CC0-1.0. The manifest's
+# `license` field is the crate's *Rust-code* license; the lexicon
+# JSON files in `lexicons/` carry their own CC0-1.0 licensing.
+# For Phase 2 we keep the manifest at CC0-1.0 to match the lexicon
+# JSON shape — Phase 6 polish swaps the manifest to a SPDX
+# expression that captures the dual license accurately. See
+# CHAINLINKS #16.
+
+[lib]
+name = "kryphocron_lexicons"
+path = "src/lib.rs"
+
+[dependencies]
+# Validated AT Protocol identifier newtypes (Did, Nsid, AtUri,
+# RecordKey, Tid, Datetime). §5 references proto-blue-lexicon as
+# the dep but the identifier types live in this sibling crate;
+# Phase 2 surfaces this as a finding (see PHASE_2_COMPLETION_REPORT.md).
+proto-blue-syntax = "~0.3.1"
+
+# Data-shape types (BlobRef, etc.) that proto-blue-codegen emits
+# into the generated Rust output. Required for the codegen output
+# to compile.
+proto-blue-lex-data = "~0.3.1"
+
+# Validated lexicon document parsing. Used by build.rs for the
+# §5.4 private-tier structural validation rule.
+proto-blue-lexicon = "~0.3.1"
+
+# Stable, deterministic SHA-256 hashing for the §5.3 generated-
+# code hand-edit rejection mechanism.
+sha2 = "0.10"
+
+# §9.5 structured error derivation.
+thiserror = "2"
+
+# JSON parsing for the manifest / lockfile / version.json.
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["preserve_order"] }
+
+[build-dependencies]
+# Build-time deps for build.rs.
+proto-blue-lexicon = "~0.3.1"
+sha2 = "0.10"
+serde = { version = "1", features = ["derive"] }
+serde_json = { version = "1", features = ["preserve_order"] }
+thiserror = "2"
+which = "7"
+
+# Note on proto-blue-codegen: §5.2 prescribes a primary library-API
+# integration path with subprocess fallback. proto-blue-codegen
+# 0.3.1 ships as a binary-only crate (no lib.rs), so Phase 2 uses
+# the subprocess fallback. The build script discovers the
+# `proto-blue-codegen` binary on PATH via the `which` crate and
+# spawns it as a subprocess. Operators must install the binary
+# (e.g., `cargo install proto-blue-codegen --version ~0.3.1`)
+# before the kryphocron-lexicons build will succeed. See
+# CHAINLINKS #17 for the future library-API swap.
+
+[dev-dependencies]
+tempfile = "3"
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+rust_2024_compatibility = { level = "warn", priority = -1 }
+
+[lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "allow", priority = -1 }
+todo = "allow"
+unimplemented = "allow"

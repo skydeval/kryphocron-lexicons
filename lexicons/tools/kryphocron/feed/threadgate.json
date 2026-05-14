@@ -1,0 +1,56 @@
+{
+  "lexicon": 1,
+  "id": "tools.kryphocron.feed.threadgate",
+  "description": "Thread-level interaction policy. Field schema compatible with app.bsky.feed.threadgate. For private-tier threads, allow-rules are additional constraints on top of audience-list membership.",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["post", "createdAt"],
+        "properties": {
+          "post": {
+            "type": "ref",
+            "ref": "tools.kryphocron.feed.postPublic#strongRef",
+            "description": "The root post the threadgate applies to."
+          },
+          "allow": {
+            "type": "array",
+            "description": "Who can reply.",
+            "items": {
+              "type": "union",
+              "refs": ["#mentionRule", "#followingRule", "#listRule"]
+            },
+            "maxLength": 5
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    },
+    "mentionRule": {
+      "type": "object",
+      "description": "Allow replies from users mentioned in the post.",
+      "properties": {}
+    },
+    "followingRule": {
+      "type": "object",
+      "description": "Allow replies from users the post's author follows.",
+      "properties": {}
+    },
+    "listRule": {
+      "type": "object",
+      "description": "Allow replies from members of a specific list.",
+      "required": ["list"],
+      "properties": {
+        "list": {
+          "type": "string",
+          "format": "at-uri"
+        }
+      }
+    }
+  }
+}

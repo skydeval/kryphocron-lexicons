@@ -1,0 +1,201 @@
+{
+  "lexicon": 1,
+  "id": "tools.kryphocron.feed.postPublic",
+  "description": "Public-tier post. Field schema compatible with app.bsky.feed.post; consuming AppViews must include this NSID in their allowlist to index it. Substrate behavior: emit to public firehose, no audience-list consultation.",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["text", "createdAt"],
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "Post content.",
+            "maxGraphemes": 300,
+            "maxLength": 3000
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime",
+            "description": "Time the post was created on the client."
+          },
+          "reply": {
+            "type": "ref",
+            "ref": "#replyRef",
+            "description": "Optional parent and root post references."
+          },
+          "embed": {
+            "type": "union",
+            "refs": ["#embedImage", "#embedExternal", "#embedRecord"],
+            "description": "Optional embed (image, external link, or quoted record)."
+          },
+          "facets": {
+            "type": "array",
+            "description": "Text annotations (mentions, links, tags).",
+            "items": {
+              "type": "ref",
+              "ref": "#facet"
+            }
+          }
+        }
+      }
+    },
+    "replyRef": {
+      "type": "object",
+      "required": ["root", "parent"],
+      "properties": {
+        "root": {
+          "type": "ref",
+          "ref": "#strongRef"
+        },
+        "parent": {
+          "type": "ref",
+          "ref": "#strongRef"
+        }
+      }
+    },
+    "strongRef": {
+      "type": "object",
+      "required": ["uri", "cid"],
+      "properties": {
+        "uri": {
+          "type": "string",
+          "format": "at-uri"
+        },
+        "cid": {
+          "type": "string",
+          "format": "cid"
+        }
+      }
+    },
+    "embedImage": {
+      "type": "object",
+      "required": ["images"],
+      "properties": {
+        "images": {
+          "type": "array",
+          "items": {
+            "type": "ref",
+            "ref": "#image"
+          },
+          "maxLength": 4
+        }
+      }
+    },
+    "image": {
+      "type": "object",
+      "required": ["image", "alt"],
+      "properties": {
+        "image": {
+          "type": "blob",
+          "accept": ["image/*"],
+          "maxSize": 1000000
+        },
+        "alt": {
+          "type": "string",
+          "description": "Alt-text for accessibility."
+        }
+      }
+    },
+    "embedExternal": {
+      "type": "object",
+      "required": ["external"],
+      "properties": {
+        "external": {
+          "type": "ref",
+          "ref": "#external"
+        }
+      }
+    },
+    "external": {
+      "type": "object",
+      "required": ["uri", "title", "description"],
+      "properties": {
+        "uri": {
+          "type": "string",
+          "format": "uri"
+        },
+        "title": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    },
+    "embedRecord": {
+      "type": "object",
+      "required": ["record"],
+      "properties": {
+        "record": {
+          "type": "ref",
+          "ref": "#strongRef"
+        }
+      }
+    },
+    "facet": {
+      "type": "object",
+      "required": ["index", "features"],
+      "properties": {
+        "index": {
+          "type": "ref",
+          "ref": "#byteSlice"
+        },
+        "features": {
+          "type": "array",
+          "items": {
+            "type": "union",
+            "refs": ["#mention", "#link", "#tag"]
+          }
+        }
+      }
+    },
+    "byteSlice": {
+      "type": "object",
+      "required": ["byteStart", "byteEnd"],
+      "properties": {
+        "byteStart": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "byteEnd": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "mention": {
+      "type": "object",
+      "required": ["did"],
+      "properties": {
+        "did": {
+          "type": "string",
+          "format": "did"
+        }
+      }
+    },
+    "link": {
+      "type": "object",
+      "required": ["uri"],
+      "properties": {
+        "uri": {
+          "type": "string",
+          "format": "uri"
+        }
+      }
+    },
+    "tag": {
+      "type": "object",
+      "required": ["tag"],
+      "properties": {
+        "tag": {
+          "type": "string",
+          "maxGraphemes": 64,
+          "maxLength": 640
+        }
+      }
+    }
+  }
+}

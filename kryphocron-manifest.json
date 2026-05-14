@@ -1,0 +1,43 @@
+{
+  "manifest_version": "1.0.0",
+  "lexicons": {
+    "tools.kryphocron.feed.postPublic": {
+      "tier": "public",
+      "lexicon_version": "1.0.0"
+    },
+    "tools.kryphocron.feed.postPrivate": {
+      "tier": "private",
+      "lexicon_version": "1.0.0"
+    },
+    "tools.kryphocron.feed.like": {
+      "tier": "public",
+      "lexicon_version": "1.0.0"
+    },
+    "tools.kryphocron.feed.repost": {
+      "tier": "public",
+      "lexicon_version": "1.0.0"
+    },
+    "tools.kryphocron.feed.threadgate": {
+      "tier": "public",
+      "lexicon_version": "1.0.0"
+    },
+    "tools.kryphocron.graph.block": {
+      "tier": "private",
+      "lexicon_version": "1.0.0",
+      "audience_exempt": true,
+      "exemption_reason": "consumed by BlockOracle outside the normal capability flow (§5.4 exemption rule)"
+    },
+    "tools.kryphocron.graph.mute": {
+      "tier": "private",
+      "lexicon_version": "1.0.0",
+      "audience_exempt": true,
+      "exemption_reason": "consumed by MuteOracle outside the normal capability flow (§5.4 exemption rule)"
+    },
+    "tools.kryphocron.policy.audience": {
+      "tier": "private",
+      "lexicon_version": "1.0.0",
+      "audience_exempt": true,
+      "exemption_reason": "is the audience mechanism itself; not a consumer of one (§5.4 explicit exemption)"
+    }
+  }
+}

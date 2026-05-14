@@ -1,0 +1,26 @@
+{
+  "lexicon": 1,
+  "id": "tools.kryphocron.feed.like",
+  "description": "Public-tier like. Field schema compatible with app.bsky.feed.like.",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["subject", "createdAt"],
+        "properties": {
+          "subject": {
+            "type": "ref",
+            "ref": "tools.kryphocron.feed.postPublic#strongRef",
+            "description": "The liked record."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    }
+  }
+}

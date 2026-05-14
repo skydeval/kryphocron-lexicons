@@ -1,0 +1,51 @@
+{
+  "lexicon": 1,
+  "id": "tools.kryphocron.feed.postPrivate",
+  "description": "Private-tier post. Audience-gated via the required audienceList reference; never federated; visible only to requesters in the audience list. The presence of audienceList is what structurally distinguishes private from public per §5.4.",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["text", "createdAt", "audienceList"],
+        "properties": {
+          "text": {
+            "type": "string",
+            "description": "Post content.",
+            "maxGraphemes": 300,
+            "maxLength": 3000
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          },
+          "audienceList": {
+            "type": "ref",
+            "ref": "tools.kryphocron.policy.audience",
+            "description": "Required reference to the audience list governing visibility (§5.4 structural validation rule for private-tier lexicons)."
+          },
+          "reply": {
+            "type": "ref",
+            "ref": "tools.kryphocron.feed.postPublic#replyRef"
+          },
+          "embed": {
+            "type": "union",
+            "refs": [
+              "tools.kryphocron.feed.postPublic#embedImage",
+              "tools.kryphocron.feed.postPublic#embedExternal",
+              "tools.kryphocron.feed.postPublic#embedRecord"
+            ]
+          },
+          "facets": {
+            "type": "array",
+            "items": {
+              "type": "ref",
+              "ref": "tools.kryphocron.feed.postPublic#facet"
+            }
+          }
+        }
+      }
+    }
+  }
+}

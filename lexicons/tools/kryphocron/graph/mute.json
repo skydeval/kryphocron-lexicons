@@ -1,0 +1,26 @@
+{
+  "lexicon": 1,
+  "id": "tools.kryphocron.graph.mute",
+  "description": "Private-tier mute record. One-directional, viewer-visible-only. Audience-list-exempt per §5.4 (consumed by MuteOracle outside the normal capability flow).",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["subject", "createdAt"],
+        "properties": {
+          "subject": {
+            "type": "string",
+            "format": "did",
+            "description": "The muted DID."
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "datetime"
+          }
+        }
+      }
+    }
+  }
+}

@@ -5,3 +5,4 @@ docs/design/
 # Local Claude Code state
 .claude/
 .chainlink
+.mcp.json

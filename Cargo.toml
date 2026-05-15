@@ -1,23 +1,25 @@
 [package]
 name = "kryphocron-lexicons"
-version = "0.1.0-phase2"
+version = "0.1.0"
 edition = "2024"
 rust-version = "1.85"
-license = "CC0-1.0"
+license = "MPL-2.0 AND CC0-1.0"
 description = "Lexicon JSON resources, codegen-produced Rust types, and the build-time registry for the kryphocron substrate."
 keywords = ["atproto", "lexicon", "kryphocron"]
 categories = ["development-tools"]
-publish = false
+authors = ["skydeval <skydeval@mail.nearhorizon.app>"]
+repository = "https://github.com/skydeval/kryphocron-lexicons"
 
-# Phase 2 manifest. §9.8 splits the kryphocron-lexicons license:
-# Rust code (codegen wrappers, build.rs, lib.rs) under
-# AGPL-3.0-or-later; lexicon JSON under CC0-1.0. The manifest's
-# `license` field is the crate's *Rust-code* license; the lexicon
-# JSON files in `lexicons/` carry their own CC0-1.0 licensing.
-# For Phase 2 we keep the manifest at CC0-1.0 to match the lexicon
-# JSON shape — Phase 6 polish swaps the manifest to a SPDX
-# expression that captures the dual license accurately. See
-# CHAINLINKS #16.
+# Dual-license per §9.8 (kryphocron design doc):
+# - Rust code (codegen wrappers, build.rs, lib.rs) under
+#   MPL-2.0 (file-level copyleft, matches the kryphocron core
+#   crate's license).
+# - Lexicon JSON files under `lexicons/` under CC0-1.0
+#   (public domain dedication; the wire vocabulary is
+#   universal and unencumbered).
+# The SPDX expression `MPL-2.0 AND CC0-1.0` captures the
+# combined nature of the package per crates.io conventions.
+# Resolves CHAINLINKS #16 (kryphocron repo).
 
 [lib]
 name = "kryphocron_lexicons"

@@ -9,6 +9,7 @@ keywords = ["atproto", "lexicon", "kryphocron"]
 categories = ["development-tools"]
 authors = ["skydeval <skydeval@mail.nearhorizon.app>"]
 repository = "https://github.com/skydeval/kryphocron-lexicons"
+readme = "README.md"
 
 # Dual-license per §9.8 (kryphocron design doc):
 # - Rust code (codegen wrappers, build.rs, lib.rs) under

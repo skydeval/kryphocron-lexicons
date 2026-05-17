@@ -5,8 +5,8 @@
 //! 1. Discover the `proto-blue-codegen` binary on `PATH` via the
 //!    `which` crate. The §5.2 primary library-API integration path
 //!    requires `proto-blue-codegen` to expose `Generator` and
-//!    `load_lexicons` from a `lib.rs`; v0.3.1 ships binary-only
-//!    (CHAINLINKS #17), so Phase 2 lands the subprocess fallback.
+//!    `load_lexicons` from a `lib.rs`; v0.3.x ships binary-only,
+//!    so the build uses the subprocess fallback.
 //! 2. Invoke the binary as a subprocess against `lexicons/` and
 //!    write its output to `OUT_DIR/codegen-output/`.
 //! 3. Parse `kryphocron-manifest.json` and `.kryphocron-manifest.lock`
@@ -28,8 +28,9 @@
 //!    consumers.
 //! 7. Hash-based hand-edit rejection (§5.3): the build emits a
 //!    SHA-256 digest of the concatenated codegen output. The
-//!    runtime crate exposes it as a constant; CI / Phase B confirms
-//!    a hand-edit of any generated file produces a different hash.
+//!    runtime crate exposes it as a constant; hand-editing any
+//!    generated file produces a different hash, which CI compares
+//!    against the committed value.
 //! 8. Emit `OUT_DIR/codegen-entry.rs` (path-redirected entrypoint
 //!    that mounts the codegen output at `crate::tools`) and
 //!    `OUT_DIR/registry.rs` (the `KRYPHOCRON_LEXICON_REGISTRY`
@@ -196,8 +197,8 @@ struct ManifestEntry {
     tier: String,
     // §5.4 commits per-lexicon version on every entry; we
     // deserialize it to enforce its presence as a structural
-    // schema check (deserialize fails if absent), but Phase 2
-    // does not yet consume the value.
+    // schema check (deserialize fails if absent), but v0.1 does
+    // not yet consume the value.
     #[allow(dead_code)]
     lexicon_version: String,
     #[serde(default)]
@@ -717,8 +718,8 @@ fn write_registry(
     // ---- KRYPHOCRON_CODEGEN_HASH constant ----
     s.push_str("/// SHA-256 digest of the concatenated proto-blue-codegen output.\n");
     s.push_str("///\n");
-    s.push_str("/// Phase B: edit any file under the generated `tools` tree and\n");
-    s.push_str("/// the rebuilt hash differs. §5.3 hand-edit rejection: operators\n");
+    s.push_str("/// Edit any file under the generated `tools` tree and the\n");
+    s.push_str("/// rebuilt hash differs. §5.3 hand-edit rejection: operators\n");
     s.push_str("/// who genuinely need to extend generated types should do so via\n");
     s.push_str("/// trait impls in separate modules.\n");
     s.push_str(&format!(
@@ -904,14 +905,14 @@ impl std::fmt::Display for BuildError {
             BuildError::ManifestSchemaVersion(v) => write!(
                 f,
                 "manifest_version `{v}` is not recognized.\n\
-                 Phase 2 supports manifest_version = \"1.0.0\" only;\n\
+                 v0.1 supports manifest_version = \"1.0.0\" only;\n\
                  unrecognized schemas are rejected explicitly per §5.4."
             ),
             BuildError::LockfileParse(d) => {
                 write!(f, ".kryphocron-manifest.lock parse error: {d}")
             }
             BuildError::LockfileSchemaVersion(v) => {
-                write!(f, "lock_version `{v}` is not recognized (Phase 2 supports 1.0.0)")
+                write!(f, "lock_version `{v}` is not recognized (v0.1 supports 1.0.0)")
             }
             BuildError::VersionParse(d) => write!(f, "version.json parse error: {d}"),
             BuildError::LexiconParse { path, detail } => {

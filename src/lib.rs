@@ -1,12 +1,14 @@
 //! # kryphocron-lexicons — companion lexicon crate
 //!
-//! Phase 2 deliverable per §5 of the kryphocron design doc.
-//! Ships the eight v1 ATProto lexicons under `tools.kryphocron.*`,
-//! the substrate-specific sidecar manifest, the build-time three-
-//! way registry consistency check, and the
-//! [`KRYPHOCRON_LEXICON_REGISTRY`] constant the kryphocron crate
-//! consumes as its compiled-in registry trust anchor (§5.4
-//! build-time-authoritative discipline).
+//! Companion crate to [kryphocron], per §5 of the substrate
+//! design. Ships the eight v1 ATProto lexicons under
+//! `tools.kryphocron.*`, the substrate-specific sidecar
+//! manifest, the build-time three-way registry consistency
+//! check, and the [`KRYPHOCRON_LEXICON_REGISTRY`] constant the
+//! kryphocron crate consumes as its compiled-in registry trust
+//! anchor (§5.4 build-time-authoritative discipline).
+//!
+//! [kryphocron]: https://crates.io/crates/kryphocron
 //!
 //! ## What lives here
 //!
@@ -17,12 +19,13 @@
 //! - `build.rs` — the codegen + post-processing pipeline. Invokes
 //!   `proto-blue-codegen` as a subprocess (§5.2 fallback path;
 //!   §5.2's primary library-API path is blocked on proto-blue
-//!   exporting a `lib.rs`, tracked as CHAINLINKS #17).
+//!   exporting a `lib.rs`).
 //! - [`Tier`], [`Visibility`], [`UnknownNsid`], [`SemVer`],
 //!   [`DeprecationState`], [`LexiconRegistryEntry`] — the tier
-//!   vocabulary, moved here from `kryphocron::tier` in Phase 2.
-//!   See `PHASE_2_COMPLETION_REPORT.md` for the orphan-rules
-//!   reasoning.
+//!   vocabulary. Rust's orphan rules require the
+//!   `impl Tier { fn from_nsid }` that §5.3 commits to live in
+//!   the same crate that defines [`Tier`]; the registry is
+//!   build-script-generated here, so [`Tier`] lives here too.
 //! - The generated registry constant
 //!   [`KRYPHOCRON_LEXICON_REGISTRY`] and the
 //!   `impl Tier { pub fn from_nsid }` block, included from
@@ -51,8 +54,8 @@ pub use proto_blue_syntax::{AtUri, Datetime, Did, Handle, Nsid, RecordKey, Tid};
 // Content-addressable identifier + blob reference types live in
 // proto-blue-lex-data (one tier below proto-blue-lexicon's full
 // LexiconDoc parser). Re-exported for consumers — kryphocron's
-// §4.4 sensitive-representation layer and Phase 1's `Cid`
-// placeholder both rest on `Cid` having one canonical home.
+// §4.4 sensitive-representation layer rests on `Cid` having one
+// canonical home.
 pub use proto_blue_lex_data::{BlobRef, Cid, CidError};
 
 // Re-export the LexiconDoc shape so operator tooling can parse
@@ -60,7 +63,8 @@ pub use proto_blue_lex_data::{BlobRef, Cid, CidError};
 // proto-blue-lexicon.
 pub use proto_blue_lexicon::LexiconDoc;
 
-// Tier vocabulary (moved here from kryphocron in Phase 2).
+// Tier vocabulary (sited here to satisfy orphan rules for the
+// build-script-generated `impl Tier { fn from_nsid }`; §5.3).
 mod tier;
 pub use tier::{
     DeprecationState, LexiconRegistryEntry, SemVer, Tier, UnknownNsid, Visibility,

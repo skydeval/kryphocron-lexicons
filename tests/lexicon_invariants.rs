@@ -1,9 +1,7 @@
-//! Phase 2 invariant tests for the kryphocron-lexicons companion
-//! crate.
+//! Invariant tests for the kryphocron-lexicons companion crate.
 //!
-//! Per the Phase 2 kickoff: "Aim for invariant verification, not
-//! coverage." This file pins the structural properties §5.3 / §5.4
-//! / §5.7 commit:
+//! Aim: invariant verification, not coverage. This file pins
+//! the structural properties §5.3 / §5.4 / §5.7 commit:
 //!
 //! - **Round-trip parsing**: every v1 lexicon JSON in
 //!   `lexicons/` deserializes as a `LexiconDoc` per
@@ -28,9 +26,10 @@
 //! lexicons / codegen output producing specific errors; lockfile
 //! immutability violations producing specific errors; private-
 //! tier audience-list missing producing the §5.4 error;
-//! hash-based hand-edit rejection) are **Phase B** manual
-//! verifications per the Phase 2 kickoff. The completion report
-//! enumerates the reproduction steps.
+//! hash-based hand-edit rejection) are exercised via manual
+//! reproductions documented separately, not in this file —
+//! triggering them requires committing a deliberately-broken
+//! manifest, which is unsuited to an in-tree test.
 
 use std::collections::BTreeMap;
 use std::fs;

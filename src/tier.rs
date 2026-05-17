@@ -1,4 +1,4 @@
-//! Tier vocabulary (moved here from `kryphocron::tier` in Phase 2).
+//! Tier vocabulary.
 //!
 //! Rust's orphan rules require the `impl Tier { fn from_nsid }`
 //! that §5.3 commits to be in the same crate that defines [`Tier`].
@@ -6,10 +6,7 @@
 //! `kryphocron-lexicons`, so [`Tier`] (and the [`UnknownNsid`] error,
 //! the registry-entry shape, and the [`DeprecationState`] enum) live
 //! here too. The `kryphocron` crate re-exports them at its crate
-//! root to preserve the Phase 1 public surface.
-//!
-//! See `docs/design/PHASE_2_COMPLETION_REPORT.md` for the Phase 2
-//! finding behind this move.
+//! root to preserve a single public surface for consumers.
 
 use proto_blue_syntax::Nsid;
 use thiserror::Error;
@@ -65,11 +62,11 @@ pub enum UnknownNsid {
     NotRegistered(Nsid),
 }
 
-/// Phase 1 semver triplet used in deprecation state (§5.6).
+/// Semver triplet used in deprecation state (§5.6).
 ///
-/// Moved from `kryphocron::authority::predicate::SemVer` in Phase 2
-/// so the registry constant can use it. The `kryphocron` crate
-/// re-exports this at its crate root.
+/// Sited here (rather than in the `kryphocron` crate) so the
+/// build-script-generated registry constant can reference it.
+/// The `kryphocron` crate re-exports this at its crate root.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct SemVer {
     /// Major version.

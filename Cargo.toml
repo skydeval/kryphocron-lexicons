@@ -20,7 +20,6 @@ readme = "README.md"
 #   universal and unencumbered).
 # The SPDX expression `MPL-2.0 AND CC0-1.0` captures the
 # combined nature of the package per crates.io conventions.
-# Resolves CHAINLINKS #16 (kryphocron repo).
 
 [lib]
 name = "kryphocron_lexicons"
@@ -29,8 +28,7 @@ path = "src/lib.rs"
 [dependencies]
 # Validated AT Protocol identifier newtypes (Did, Nsid, AtUri,
 # RecordKey, Tid, Datetime). §5 references proto-blue-lexicon as
-# the dep but the identifier types live in this sibling crate;
-# Phase 2 surfaces this as a finding (see PHASE_2_COMPLETION_REPORT.md).
+# the dep but the identifier types live in this sibling crate.
 proto-blue-syntax = "~0.3.1"
 
 # Data-shape types (BlobRef, etc.) that proto-blue-codegen emits
@@ -64,13 +62,14 @@ which = "7"
 
 # Note on proto-blue-codegen: §5.2 prescribes a primary library-API
 # integration path with subprocess fallback. proto-blue-codegen
-# 0.3.1 ships as a binary-only crate (no lib.rs), so Phase 2 uses
-# the subprocess fallback. The build script discovers the
+# 0.3.x ships as a binary-only crate (no lib.rs), so the build
+# uses the subprocess fallback. The build script discovers the
 # `proto-blue-codegen` binary on PATH via the `which` crate and
 # spawns it as a subprocess. Operators must install the binary
 # (e.g., `cargo install proto-blue-codegen --version ~0.3.1`)
-# before the kryphocron-lexicons build will succeed. See
-# CHAINLINKS #17 for the future library-API swap.
+# before the kryphocron-lexicons build will succeed. If upstream
+# later exposes a library API, this build script can swap to that
+# path without a wire-format-touching change.
 
 [dev-dependencies]
 tempfile = "3"

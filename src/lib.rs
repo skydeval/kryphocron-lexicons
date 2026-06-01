@@ -81,3 +81,51 @@ include!(concat!(env!("OUT_DIR"), "/codegen-entry.rs"));
 // hand-edit-rejection hash), `KRYPHOCRON_LEXICON_REGISTRY`, and
 // the `impl Tier { pub fn from_nsid }` block.
 include!(concat!(env!("OUT_DIR"), "/registry.rs"));
+
+// `lexicon_jsons.rs` defines `LEXICON_JSONS: &[(&str, &str)]` — the
+// verbatim lexicon JSON text paired with each NSID, emitted by the
+// build script. Consumed by the `lexicons()` accessor below.
+include!(concat!(env!("OUT_DIR"), "/lexicon_jsons.rs"));
+
+// ---- Runtime lexicon-document accessor ----
+
+use std::sync::OnceLock;
+
+use proto_blue_lexicon::Lexicons;
+
+static LEXICONS: OnceLock<Lexicons> = OnceLock::new();
+
+/// Returns the full set of `tools.kryphocron.*` lexicon documents as
+/// a proto-blue [`Lexicons`] collection, suitable for use with
+/// `proto_blue_lexicon::validate_record` and the other AST-shaped
+/// validators.
+///
+/// The metadata-only [`KRYPHOCRON_LEXICON_REGISTRY`] exposes each
+/// lexicon's NSID, tier, and deprecation state; this accessor exposes
+/// the underlying parsed schema documents, which validation needs and
+/// the registry does not carry. The two are complementary, as are the
+/// codegen `tools::*` typed structs for typed Rust access.
+///
+/// Constructed once per process via [`OnceLock`]: the first call parses
+/// every embedded JSON and builds the collection; subsequent calls
+/// return the same `&'static Lexicons`.
+///
+/// # Panics
+///
+/// Panics if any embedded lexicon JSON fails to parse or fails
+/// proto-blue's load-time schema refinement. The JSON is vendored
+/// in-tree and embedded at build time, so a failure here means the
+/// crate itself is broken, not that a caller supplied bad input — a
+/// loud panic is the correct response.
+#[must_use]
+pub fn lexicons() -> &'static Lexicons {
+    LEXICONS.get_or_init(|| {
+        let mut docs = Lexicons::new();
+        for (nsid, json) in LEXICON_JSONS {
+            docs.add_from_json(json).unwrap_or_else(|e| {
+                panic!("kryphocron-lexicons: failed to load lexicon doc for {nsid}: {e}")
+            });
+        }
+        docs
+    })
+}

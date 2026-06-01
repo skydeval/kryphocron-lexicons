@@ -9,6 +9,18 @@ convention.
 [Keep a Changelog]: https://keepachangelog.com/en/1.1.0/
 [Semantic Versioning]: https://semver.org/spec/v2.0.0.html
 
+## [Unreleased]
+
+### Added
+- `lexicons()` accessor returning the lexicon document collection
+  for runtime validation. Returns a `&'static
+  proto_blue_lexicon::Lexicons` built once per process (via
+  `OnceLock`) from the lexicon JSON embedded by the build script,
+  suitable for use with `proto_blue_lexicon::validate_record`.
+  Complements the metadata-only `KRYPHOCRON_LEXICON_REGISTRY` and the
+  codegen `tools::*` typed structs; additive, no existing surface
+  changed.
+
 ## [0.1.0] — 2026-05-17
 
 Initial publication. Companion crate to [kryphocron].

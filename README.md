@@ -9,15 +9,6 @@ by [kryphocron], a privacy-first ATProto substrate.
 
 [kryphocron]: https://crates.io/crates/kryphocron
 
-> ⚠️ **Early access (0.1.x).** kryphocron-lexicons is published
-> to crates.io alongside [kryphocron] to invite review and
-> integration feedback. The lexicon vocabulary is committed for
-> the 0.1 line; codegen output may evolve through 0.2 as
-> `proto-blue-codegen` matures. See [kryphocron's README] for
-> the substrate-level framing.
-
-[kryphocron's README]: https://github.com/skydeval/kryphocron#readme
-
 ## What this crate ships
 
 - **Lexicon JSON files** under `lexicons/tools/kryphocron/`
@@ -104,7 +95,7 @@ Install the codegen binary before `cargo build`:
   run: cargo build
 ```
 
-## What v0.1 ships
+## What this crate ships in detail
 
 - Eight `tools.kryphocron.*` lexicon JSON files (the table
   above).

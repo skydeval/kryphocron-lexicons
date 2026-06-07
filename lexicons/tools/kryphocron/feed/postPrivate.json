@@ -21,9 +21,14 @@
             "format": "datetime"
           },
           "audienceList": {
-            "type": "ref",
-            "ref": "tools.kryphocron.policy.audience",
-            "description": "Required reference to the audience list governing visibility (§5.4 structural validation rule for private-tier lexicons)."
+            "type": "string",
+            "format": "at-uri",
+            "description": "Required AT-URI reference to the audience list governing visibility. Consulted at read time; membership changes on the referenced audience apply retroactively to records carrying this reference (§5.4 structural validation rule for private-tier lexicons; KRYPHOCRON_CRATE_DESIGN.md §read-time consultation + retroactive membership)."
+          },
+          "publicCompanion": {
+            "type": "string",
+            "format": "at-uri",
+            "description": "Optional AT-URI pointing at a paired public-tier record (the public side of a dual-faced post). The linkage lives only on the kryphocron-side record; the public-side record carries no kryphocron-visible markers. When absent, the post is a standalone private post with no public companion."
           },
           "reply": {
             "type": "ref",

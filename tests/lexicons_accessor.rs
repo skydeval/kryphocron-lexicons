@@ -39,19 +39,11 @@ fn post_private_record() -> &'static LexRecord {
     }
 }
 
-/// A conformant `audienceList` value. (The ref resolves to the
-/// `policy.audience` record def, so proto-blue treats its content
-/// permissively; a realistic object is used for clarity.)
+/// A conformant `audienceList` value. The field is an at-uri string
+/// referencing a `policy.audience` record (consulted at read time),
+/// not an embedded object.
 fn audience_value() -> LexValue {
-    let mut m: BTreeMap<String, LexValue> = BTreeMap::new();
-    m.insert("name".to_string(), LexValue::from("close friends"));
-    m.insert(
-        "members".to_string(),
-        LexValue::from(vec![LexValue::from("did:plc:z72i7hdynmk6r22z27h6tvur")]),
-    );
-    m.insert("createdAt".to_string(), LexValue::from("2026-05-31T12:30:00Z"));
-    m.insert("updatedAt".to_string(), LexValue::from("2026-05-31T12:30:00Z"));
-    LexValue::from(m)
+    LexValue::from("at://did:plc:z72i7hdynmk6r22z27h6tvur/tools.kryphocron.policy.audience/3kaudiencelist01")
 }
 
 #[test]

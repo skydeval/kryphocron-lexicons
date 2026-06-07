@@ -9,6 +9,46 @@ convention.
 [Keep a Changelog]: https://keepachangelog.com/en/1.1.0/
 [Semantic Versioning]: https://semver.org/spec/v2.0.0.html
 
+## [Unreleased] — 0.2.1-dev
+
+### Added
+- `tools.kryphocron.feed.postPrivate` gains an optional
+  `publicCompanion` field — an AT-URI pointing at a paired
+  public-tier record (the public side of a dual-faced post).
+  Records lacking this field continue to be valid standalone
+  private posts.
+- `tools.kryphocron.policy.audience` gains an optional `mode`
+  field supporting five visibility modes (`list`, `everyone`,
+  `followers`, `following`, `nobody`). Lexicon-optional for
+  0.1-compatibility; absence reads as `list`. 0.2+ writers
+  populate it explicitly per substrate-side validation.
+
+### Changed
+- `tools.kryphocron.policy.audience` `members` array becomes
+  lexicon-optional. The conditional-required rule (required when
+  `mode == "list"`) is enforced at the application layer;
+  substrate-side `validate_record` enforces the same rule as part
+  of lexicon-shape validation.
+- `tools.kryphocron.policy.audience` `name` field becomes
+  lexicon-optional (was required). The shipped `maxGraphemes: 64`
+  + `maxLength: 640` constraint encoding is preserved.
+
+### Fixed
+- `tools.kryphocron.feed.postPrivate.audienceList` representation
+  corrected from a record-def `ref` (which codegens to an embedded
+  `policy.audience` object) to `{type: "string", format:
+  "at-uri"}` (a plain AT-URI string). The substrate's design
+  semantics (read-time consultation; retroactive membership on the
+  referenced audience list — KRYPHOCRON_CRATE_DESIGN.md §read-time
+  consultation + retroactive membership) are by-reference; the
+  published 0.2.0 lexicon-JSON encoding had drifted from that
+  design and codegenned to an embedded shape that downstream
+  consumers could not validate against actual on-disk records.
+  The §5.4 structural validator in `build.rs` (and its shadow
+  check in `tests/lexicon_invariants.rs`) were amended in lockstep
+  to require the `audienceList` field as a string with `at-uri`
+  format rather than a record-def ref.
+
 ## [0.2.0] — 2026-06-02
 
 ### Added

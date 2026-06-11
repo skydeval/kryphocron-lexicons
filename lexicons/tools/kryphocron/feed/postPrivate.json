@@ -8,13 +8,28 @@
       "key": "tid",
       "record": {
         "type": "object",
-        "required": ["text", "createdAt", "audienceList"],
+        "required": ["createdAt", "audienceList"],
         "properties": {
           "text": {
             "type": "string",
             "description": "Post content.",
             "maxGraphemes": 300,
             "maxLength": 3000
+          },
+          "encodedContent": {
+            "type": "bytes",
+            "description": "Optional codec output for at-rest content transform. When present, replaces the `text` field (XOR — exactly one of the two MUST be present, substrate-enforced per validate_record). Codec interpretation is opaque to the substrate; for laquna, this includes the 32-byte slug inline at the tail. See encodedContentCodec for the codec identifier.",
+            "maxLength": 1000000
+          },
+          "encodedContentCodec": {
+            "type": "string",
+            "description": "Operator-namespaced codec identifier (e.g. 'laquna/0.2') for the codec that produced `encodedContent`. Required at application layer when `encodedContent` is present (substrate-enforced per validate_record). Matches the Rust-side CodecId(BoundedString<128>) bound.",
+            "maxLength": 128
+          },
+          "encodedContentGeneration": {
+            "type": "string",
+            "description": "Optional per-record rotation generation mark. Stamped by the substrate from the resolved RotationOracle hint at encode time. Host rewrite-on-rotate jobs select records by `WHERE encodedContentGeneration < current_generation`. Matches the Rust-side RotationGenerationMark(BoundedString<128>) bound. See kryphocron 0.3 design §2.5 ordering contract: host MUST pick a lex-sortable encoding.",
+            "maxLength": 128
           },
           "createdAt": {
             "type": "string",

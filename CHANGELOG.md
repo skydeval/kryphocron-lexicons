@@ -9,7 +9,7 @@ convention.
 [Keep a Changelog]: https://keepachangelog.com/en/1.1.0/
 [Semantic Versioning]: https://semver.org/spec/v2.0.0.html
 
-## [Unreleased] — 0.2.1-dev
+## [0.3.0] — UNRELEASED
 
 ### Added
 - `tools.kryphocron.feed.postPrivate` gains an optional
@@ -21,9 +21,44 @@ convention.
   field supporting five visibility modes (`list`, `everyone`,
   `followers`, `following`, `nobody`). Lexicon-optional for
   0.1-compatibility; absence reads as `list`. 0.2+ writers
-  populate it explicitly per substrate-side validation.
+  populate it explicitly per substrate-side validation. The five
+  values are encoded as `knownValues` (advisory, open at the
+  lexicon layer) rather than a closed lexicon enum: closure of the
+  value set is enforced substrate-side in `validate_record`,
+  mirroring the `members` conditional-required pattern
+  (lexicon-permissive, substrate-strict). This is the established
+  kryphocron idiom — there is no closed-enum construct in any
+  kryphocron lexicon.
+- `tools.kryphocron.feed.postPrivate` gains an optional
+  `encodedContent` field — a `bytes` field (maxLength 1_000_000)
+  carrying codec output when an at-rest content codec is installed.
+  Exactly one of `text` or `encodedContent` is present per record
+  (XOR, substrate-enforced in `validate_record`). Inline `bytes`
+  rather than CID-referenced `blob` so the codec output lands in
+  the DAG-CBOR record itself, avoiding a separate blob-store fetch
+  on every authorized read of a private-tier record (blob
+  indirection, per the `postPublic` image-embed precedent, suits
+  CDN-friendly media fan-out, not content read in the same
+  operation as the rest of the record).
+- `tools.kryphocron.feed.postPrivate` gains an optional
+  `encodedContentCodec` field — a `string` (maxLength 128) carrying
+  the operator-namespaced codec identifier (e.g. `laquna/0.2`).
+  Required at the application layer when `encodedContent` is
+  present.
+- `tools.kryphocron.feed.postPrivate` gains an optional
+  `encodedContentGeneration` field — a `string` (maxLength 128)
+  carrying the per-record rotation generation mark. Host
+  rewrite-on-rotate jobs select records by lexicographic comparison
+  on this field; hosts MUST pick a lex-sortable encoding
+  (kryphocron 0.3 design §2.5 ordering contract).
 
 ### Changed
+- `tools.kryphocron.feed.postPrivate` `text` field relaxed from
+  required to optional; `required` becomes `["createdAt",
+  "audienceList"]`. Records carry exactly one of `text` or
+  `encodedContent` (the XOR above). The `text` field definition
+  (string, `maxGraphemes: 300`, `maxLength: 3000`) is otherwise
+  unchanged.
 - `tools.kryphocron.policy.audience` `members` array becomes
   lexicon-optional. The conditional-required rule (required when
   `mode == "list"`) is enforced at the application layer;

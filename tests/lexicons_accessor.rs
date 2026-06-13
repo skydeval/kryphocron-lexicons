@@ -68,14 +68,16 @@ fn validate_record_rejects_missing_required_field() {
     let lexicons = kryphocron_lexicons::lexicons();
     let rec = post_private_record();
 
-    // `text` is required by postPrivate#main; omitting it must fail.
+    // `audienceList` is required by postPrivate#main; omitting it must fail.
+    // (`text` is optional as of 0.3.0 — a record may carry `encodedContent`
+    // instead — so its absence is no longer a validation failure.)
     let mut m: BTreeMap<String, LexValue> = BTreeMap::new();
+    m.insert("text".to_string(), LexValue::from("a private post"));
     m.insert("createdAt".to_string(), LexValue::from("2026-05-31T12:30:00Z"));
-    m.insert("audienceList".to_string(), audience_value());
     let value = LexValue::from(m);
 
     assert!(
         validate_record(lexicons, rec, &value).is_err(),
-        "expected a postPrivate value missing the required `text` field to fail validation"
+        "expected a postPrivate value missing the required `audienceList` field to fail validation"
     );
 }

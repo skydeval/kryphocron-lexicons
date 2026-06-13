@@ -1,7 +1,7 @@
 {
   "lexicon": 1,
   "id": "tools.kryphocron.feed.postPrivate",
-  "description": "Private-tier post. Audience-gated via the required audienceList reference; never federated; visible only to requesters in the audience list. The presence of audienceList is what structurally distinguishes private from public per §5.4.",
+  "description": "Private-tier post. Audience-gated via the required audienceList reference; never federated; visible only to requesters in the audience list. The presence of audienceList is what structurally distinguishes private from public.",
   "defs": {
     "main": {
       "type": "record",
@@ -28,7 +28,7 @@
           },
           "encodedContentGeneration": {
             "type": "string",
-            "description": "Optional per-record rotation generation mark. Stamped by the substrate from the resolved RotationOracle hint at encode time. Host rewrite-on-rotate jobs select records by `WHERE encodedContentGeneration < current_generation`. Matches the Rust-side RotationGenerationMark(BoundedString<128>) bound. See kryphocron 0.3 design §2.5 ordering contract: host MUST pick a lex-sortable encoding.",
+            "description": "Optional per-record rotation generation mark. Stamped by the substrate from the resolved RotationOracle hint at encode time. Host rewrite-on-rotate jobs select records by `WHERE encodedContentGeneration < current_generation`. Matches the Rust-side RotationGenerationMark(BoundedString<128>) bound. Hosts MUST pick a lex-sortable encoding.",
             "maxLength": 128
           },
           "createdAt": {
@@ -38,7 +38,7 @@
           "audienceList": {
             "type": "string",
             "format": "at-uri",
-            "description": "Required AT-URI reference to the audience list governing visibility. Consulted at read time; membership changes on the referenced audience apply retroactively to records carrying this reference (§5.4 structural validation rule for private-tier lexicons; KRYPHOCRON_CRATE_DESIGN.md §read-time consultation + retroactive membership)."
+            "description": "Required AT-URI reference to the audience list governing visibility. Consulted at read time (not at post time); membership changes on the referenced audience apply retroactively to records carrying this reference."
           },
           "publicCompanion": {
             "type": "string",

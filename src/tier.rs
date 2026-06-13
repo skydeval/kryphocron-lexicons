@@ -1,7 +1,7 @@
 //! Tier vocabulary.
 //!
 //! Rust's orphan rules require the `impl Tier { fn from_nsid }`
-//! that §5.3 commits to be in the same crate that defines [`Tier`].
+//! to be in the same crate that defines [`Tier`].
 //! The build-script-generated registry lives in
 //! `kryphocron-lexicons`, so [`Tier`] (and the [`UnknownNsid`] error,
 //! the registry-entry shape, and the [`DeprecationState`] enum) live
@@ -13,9 +13,9 @@ use thiserror::Error;
 
 /// Tier classification for substrate-managed records.
 ///
-/// See `kryphocron::tier::Tier` (re-exported) and §4.1 / §5.4.
-/// `#[non_exhaustive]` from day one so future tier additions ship
-/// as backward-compatible minor-version changes.
+/// The tier determines which requester classes may read records
+/// under an NSID. `#[non_exhaustive]` from day one so future tier
+/// additions ship as backward-compatible minor-version changes.
 #[non_exhaustive]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Tier {
@@ -25,11 +25,11 @@ pub enum Tier {
     Private,
 }
 
-/// Result of a viewer-vs-tier visibility predicate (§4.1).
+/// Result of a viewer-vs-tier visibility predicate.
 ///
 /// `Hidden` and `Forbidden` are distinct **internally** but
-/// collapse to byte-identical wire responses at the HTTP layer
-/// (§4.1 closed-namespace failure modes; §4.6 non-enumeration).
+/// collapse to byte-identical wire responses at the HTTP layer, so
+/// the wire never distinguishes them (non-enumeration).
 #[non_exhaustive]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Visibility {
@@ -52,7 +52,7 @@ impl Visibility {
 /// An NSID not present in the closed-namespace registry.
 ///
 /// Returned by `Tier::from_nsid` when the supplied NSID is not in
-/// `KRYPHOCRON_LEXICON_REGISTRY`. §4.1 closed-namespace failure
+/// `KRYPHOCRON_LEXICON_REGISTRY`. The closed-namespace failure
 /// modes apply at the substrate ingress layer.
 #[derive(Debug, Clone, PartialEq, Eq, Error)]
 #[non_exhaustive]
@@ -62,7 +62,7 @@ pub enum UnknownNsid {
     NotRegistered(Nsid),
 }
 
-/// Semver triplet used in deprecation state (§5.6).
+/// Semver triplet used in deprecation state.
 ///
 /// Sited here (rather than in the `kryphocron` crate) so the
 /// build-script-generated registry constant can reference it.
@@ -85,13 +85,13 @@ impl SemVer {
     }
 }
 
-/// Per-NSID deprecation state (§5.6).
+/// Per-NSID deprecation state.
 #[non_exhaustive]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum DeprecationState {
     /// Active; writes and reads both proceed normally.
     Active,
-    /// Deprecated; writes rejected at §4.3 stage 0; reads proceed.
+    /// Deprecated; writes rejected at the deprecation gate; reads proceed.
     Deprecated {
         /// Lexicon-set version the deprecation landed in.
         since_version: SemVer,
@@ -113,13 +113,13 @@ pub enum DeprecationState {
     },
 }
 
-/// One entry in `KRYPHOCRON_LEXICON_REGISTRY` (§5.3 / §5.6).
+/// One entry in `KRYPHOCRON_LEXICON_REGISTRY`.
 #[non_exhaustive]
 #[derive(Debug, Clone, Copy)]
 pub struct LexiconRegistryEntry {
     /// NSID of the lexicon.
     pub nsid: &'static str,
-    /// Tier classification (immutable per §5.5).
+    /// Tier classification (immutable once assigned).
     pub tier: Tier,
     /// Current deprecation state.
     pub deprecation: DeprecationState,

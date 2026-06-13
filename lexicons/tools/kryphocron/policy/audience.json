@@ -1,7 +1,7 @@
 {
   "lexicon": 1,
   "id": "tools.kryphocron.policy.audience",
-  "description": "An audience list. Defines which DIDs are authorized for a private-tier resource. Owned by its creator. Modifying requires ManageAudience capability. Consulted by AudienceOracle outside the normal capability flow; §5.4 exempts this lexicon from the audience-list-reference structural rule (it IS the audience mechanism).",
+  "description": "An audience list. Defines which DIDs are authorized for a private-tier resource. Owned by its creator. Modifying requires ManageAudience capability. Consulted by AudienceOracle outside the normal capability flow; this lexicon is exempt from the audience-list-reference structural rule (it IS the audience mechanism).",
   "defs": {
     "main": {
       "type": "record",

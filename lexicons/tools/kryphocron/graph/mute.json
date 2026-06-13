@@ -1,7 +1,7 @@
 {
   "lexicon": 1,
   "id": "tools.kryphocron.graph.mute",
-  "description": "Private-tier mute record. One-directional, viewer-visible-only. Audience-list-exempt per §5.4 (consumed by MuteOracle outside the normal capability flow).",
+  "description": "Private-tier mute record. One-directional, viewer-visible-only. Audience-list-exempt (consumed by MuteOracle outside the normal capability flow).",
   "defs": {
     "main": {
       "type": "record",

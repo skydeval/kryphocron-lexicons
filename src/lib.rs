@@ -1,12 +1,11 @@
 //! # kryphocron-lexicons — companion lexicon crate
 //!
-//! Companion crate to [kryphocron], per §5 of the substrate
-//! design. Ships the eight v1 ATProto lexicons under
-//! `tools.kryphocron.*`, the substrate-specific sidecar
-//! manifest, the build-time three-way registry consistency
-//! check, and the [`KRYPHOCRON_LEXICON_REGISTRY`] constant the
-//! kryphocron crate consumes as its compiled-in registry trust
-//! anchor (§5.4 build-time-authoritative discipline).
+//! Companion crate to [kryphocron]. Ships the eight v1 ATProto
+//! lexicons under `tools.kryphocron.*`, the substrate-specific
+//! sidecar manifest, the build-time three-way registry
+//! consistency check, and the [`KRYPHOCRON_LEXICON_REGISTRY`]
+//! constant the kryphocron crate consumes as its compiled-in,
+//! build-time-authoritative registry trust anchor.
 //!
 //! [kryphocron]: https://crates.io/crates/kryphocron
 //!
@@ -14,18 +13,17 @@
 //!
 //! - The v1 lexicon JSON resources in `lexicons/`.
 //! - `kryphocron-manifest.json` + `.kryphocron-manifest.lock` +
-//!   `version.json` — the substrate-specific sidecar mechanism
-//!   (§5.4 / §5.5).
+//!   `version.json` — the substrate-specific sidecar mechanism.
 //! - `build.rs` — the codegen + post-processing pipeline. Invokes
-//!   `proto-blue-codegen` as a subprocess (§5.2 fallback path;
-//!   §5.2's primary library-API path is blocked on proto-blue
-//!   exporting a `lib.rs`).
+//!   `proto-blue-codegen` as a subprocess; the primary
+//!   library-API path is blocked on proto-blue exporting a
+//!   `lib.rs`.
 //! - [`Tier`], [`Visibility`], [`UnknownNsid`], [`SemVer`],
 //!   [`DeprecationState`], [`LexiconRegistryEntry`] — the tier
-//!   vocabulary. Rust's orphan rules require the
-//!   `impl Tier { fn from_nsid }` that §5.3 commits to live in
-//!   the same crate that defines [`Tier`]; the registry is
-//!   build-script-generated here, so [`Tier`] lives here too.
+//!   vocabulary. Rust's orphan rules require
+//!   `impl Tier { fn from_nsid }` to live in the same crate that
+//!   defines [`Tier`]; the registry is build-script-generated
+//!   here, so [`Tier`] lives here too.
 //! - The generated registry constant
 //!   [`KRYPHOCRON_LEXICON_REGISTRY`] and the
 //!   `impl Tier { pub fn from_nsid }` block, included from
@@ -46,7 +44,7 @@
 #![doc(html_no_source)]
 
 // Re-export the proto-blue-syntax identifier types so consumers
-// of kryphocron-lexicons can reach them via this crate. §5.7's
+// of kryphocron-lexicons can reach them via this crate. The
 // lexicons reference these directly, and the generated codegen
 // output qualifies them as `proto_blue_syntax::Did` etc.
 pub use proto_blue_syntax::{AtUri, Datetime, Did, Handle, Nsid, RecordKey, Tid};
@@ -54,7 +52,7 @@ pub use proto_blue_syntax::{AtUri, Datetime, Did, Handle, Nsid, RecordKey, Tid};
 // Content-addressable identifier + blob reference types live in
 // proto-blue-lex-data (one tier below proto-blue-lexicon's full
 // LexiconDoc parser). Re-exported for consumers — kryphocron's
-// §4.4 sensitive-representation layer rests on `Cid` having one
+// sensitive-representation layer rests on `Cid` having one
 // canonical home.
 pub use proto_blue_lex_data::{BlobRef, Cid, CidError};
 
@@ -64,7 +62,7 @@ pub use proto_blue_lex_data::{BlobRef, Cid, CidError};
 pub use proto_blue_lexicon::LexiconDoc;
 
 // Tier vocabulary (sited here to satisfy orphan rules for the
-// build-script-generated `impl Tier { fn from_nsid }`; §5.3).
+// build-script-generated `impl Tier { fn from_nsid }`).
 mod tier;
 pub use tier::{
     DeprecationState, LexiconRegistryEntry, SemVer, Tier, UnknownNsid, Visibility,
@@ -77,7 +75,7 @@ pub use tier::{
 // generated code uses qualified `crate::tools::...` references.
 include!(concat!(env!("OUT_DIR"), "/codegen-entry.rs"));
 
-// `registry.rs` defines `KRYPHOCRON_CODEGEN_HASH` (the §5.3
+// `registry.rs` defines `KRYPHOCRON_CODEGEN_HASH` (the
 // hand-edit-rejection hash), `KRYPHOCRON_LEXICON_REGISTRY`, and
 // the `impl Tier { pub fn from_nsid }` block.
 include!(concat!(env!("OUT_DIR"), "/registry.rs"));

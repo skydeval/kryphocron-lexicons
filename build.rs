@@ -21,8 +21,9 @@
 //!    `version.json`. Stale committed lockfile fails with a
 //!    regenerate-and-commit instruction.
 //! 6. Private-tier structural validation (§5.4): every private-tier
-//!    lexicon must declare an `audienceList: ref<...policy.audience>`
-//!    field unless the manifest entry carries `audience_exempt: true`
+//!    lexicon must declare an `audienceList` field — a string with
+//!    `at-uri` format referencing a `policy.audience` record —
+//!    unless the manifest entry carries `audience_exempt: true`
 //!    with an `exemption_reason`. Exemption is only valid for
 //!    substrate-class capabilities or implicit-substrate-trust oracle
 //!    consumers.

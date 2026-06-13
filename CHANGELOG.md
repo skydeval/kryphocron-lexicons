@@ -9,7 +9,7 @@ convention.
 [Keep a Changelog]: https://keepachangelog.com/en/1.1.0/
 [Semantic Versioning]: https://semver.org/spec/v2.0.0.html
 
-## [0.3.0] — UNRELEASED
+## [0.3.0] — 2026-06-13
 
 ### Added
 - `postPrivate.publicCompanion` (optional AT-URI) — points at a paired public-tier record (the public side of a dual-faced post). Records without it remain valid standalone private posts.

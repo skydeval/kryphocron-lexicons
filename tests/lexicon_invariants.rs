@@ -17,8 +17,8 @@
 //!   `Err(UnknownNsid::NotRegistered)`. The closed-namespace
 //!   property of §4.1 is structural here.
 //! - **Audience-ref structural rule sanity**: every private-tier
-//!   lexicon either declares the `audienceList` reference field
-//!   or is marked `audience_exempt` in the manifest. This test
+//!   lexicon either declares the `audienceList` at-uri reference
+//!   field or is marked `audience_exempt` in the manifest. This test
 //!   shadows the build-script check (§5.4) for an outside-the-
 //!   build-pipeline second opinion.
 //!
@@ -142,7 +142,7 @@ fn private_tier_lexicons_satisfy_section_5_4_rule() {
     // Each private-tier lexicon either:
     // (a) is `tools.kryphocron.policy.audience` itself (the
     //     audience mechanism), or
-    // (b) declares an `audienceList` ref field, or
+    // (b) declares an `audienceList` at-uri reference field, or
     // (c) is `audience_exempt` per the manifest (verified at
     //     build time; this test shadows the structural check by
     //     re-reading the lexicon JSON).
@@ -150,7 +150,7 @@ fn private_tier_lexicons_satisfy_section_5_4_rule() {
     // The build script enforces this on every build (§5.4); this
     // is a second-opinion shadow check that catches a future
     // commit that toggles a private lexicon to non-exempt without
-    // adding the audienceList ref.
+    // adding the audienceList at-uri reference.
     let manifest_path =
         PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("kryphocron-manifest.json");
     let manifest_raw = fs::read_to_string(&manifest_path).unwrap();
@@ -190,13 +190,13 @@ fn private_tier_lexicons_satisfy_section_5_4_rule() {
             LexUserType::Object(o) => o,
             _ => panic!("{nsid_str}: main is neither record nor object"),
         };
-        let has_audience_ref = object.properties.values().any(|prop| match prop {
-            LexUserType::Ref(r) => r.ref_target == "tools.kryphocron.policy.audience",
-            _ => false,
-        });
+        let has_audience_ref = matches!(
+            object.properties.get("audienceList"),
+            Some(LexUserType::String(s)) if s.format.as_deref() == Some("at-uri")
+        );
         assert!(
             has_audience_ref,
-            "{nsid_str}: private-tier without audienceList ref must be `audience_exempt`",
+            "{nsid_str}: private-tier without an `audienceList` at-uri reference must be `audience_exempt`",
         );
     }
 }

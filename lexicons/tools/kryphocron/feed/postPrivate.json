@@ -1,14 +1,14 @@
 {
   "lexicon": 1,
   "id": "tools.kryphocron.feed.postPrivate",
-  "description": "Private-tier post. Audience-gated via the required audienceList reference; never federated; visible only to requesters in the audience list. The presence of audienceList is what structurally distinguishes private from public per §5.4.",
+  "description": "Private-tier post. Audience-gated via the required audienceList reference; never federated; visible only to requesters in the audience list. The presence of audienceList is what structurally distinguishes private from public.",
   "defs": {
     "main": {
       "type": "record",
       "key": "tid",
       "record": {
         "type": "object",
-        "required": ["text", "createdAt", "audienceList"],
+        "required": ["createdAt", "audienceList"],
         "properties": {
           "text": {
             "type": "string",
@@ -16,14 +16,34 @@
             "maxGraphemes": 300,
             "maxLength": 3000
           },
+          "encodedContent": {
+            "type": "bytes",
+            "description": "Optional codec output for at-rest content transform. When present, replaces the `text` field (XOR — exactly one of the two MUST be present, substrate-enforced per validate_record). Codec interpretation is opaque to the substrate; for laquna, this includes the 32-byte slug inline at the tail. See encodedContentCodec for the codec identifier.",
+            "maxLength": 1000000
+          },
+          "encodedContentCodec": {
+            "type": "string",
+            "description": "Operator-namespaced codec identifier (e.g. 'laquna/0.2') for the codec that produced `encodedContent`. Required at application layer when `encodedContent` is present (substrate-enforced per validate_record). Matches the Rust-side CodecId(BoundedString<128>) bound.",
+            "maxLength": 128
+          },
+          "encodedContentGeneration": {
+            "type": "string",
+            "description": "Optional per-record rotation generation mark. Stamped by the substrate from the resolved RotationOracle hint at encode time. Host rewrite-on-rotate jobs select records by `WHERE encodedContentGeneration < current_generation`. Matches the Rust-side RotationGenerationMark(BoundedString<128>) bound. Hosts MUST pick a lex-sortable encoding.",
+            "maxLength": 128
+          },
           "createdAt": {
             "type": "string",
             "format": "datetime"
           },
           "audienceList": {
-            "type": "ref",
-            "ref": "tools.kryphocron.policy.audience",
-            "description": "Required reference to the audience list governing visibility (§5.4 structural validation rule for private-tier lexicons)."
+            "type": "string",
+            "format": "at-uri",
+            "description": "Required AT-URI reference to the audience list governing visibility. Consulted at read time (not at post time); membership changes on the referenced audience apply retroactively to records carrying this reference."
+          },
+          "publicCompanion": {
+            "type": "string",
+            "format": "at-uri",
+            "description": "Optional AT-URI pointing at a paired public-tier record (the public side of a dual-faced post). The linkage lives only on the kryphocron-side record; the public-side record carries no kryphocron-visible markers. When absent, the post is a standalone private post with no public companion."
           },
           "reply": {
             "type": "ref",

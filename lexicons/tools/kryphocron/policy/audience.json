@@ -1,20 +1,25 @@
 {
   "lexicon": 1,
   "id": "tools.kryphocron.policy.audience",
-  "description": "An audience list. Defines which DIDs are authorized for a private-tier resource. Owned by its creator. Modifying requires ManageAudience capability. Consulted by AudienceOracle outside the normal capability flow; §5.4 exempts this lexicon from the audience-list-reference structural rule (it IS the audience mechanism).",
+  "description": "An audience list. Defines which DIDs are authorized for a private-tier resource. Owned by its creator. Modifying requires ManageAudience capability. Consulted by AudienceOracle outside the normal capability flow; this lexicon is exempt from the audience-list-reference structural rule (it IS the audience mechanism).",
   "defs": {
     "main": {
       "type": "record",
       "key": "tid",
       "record": {
         "type": "object",
-        "required": ["name", "members", "createdAt", "updatedAt"],
+        "required": ["createdAt", "updatedAt"],
         "properties": {
           "name": {
             "type": "string",
             "description": "Operator-facing label (not authorization-relevant).",
             "maxGraphemes": 64,
             "maxLength": 640
+          },
+          "mode": {
+            "type": "string",
+            "knownValues": ["list", "everyone", "followers", "following", "nobody"],
+            "description": "Audience visibility mode. Determines how the AudienceOracle resolves membership: 'list' consults the members array; 'everyone' / 'followers' / 'following' / 'nobody' are oracle-resolved against host-side identity state. Optional at the lexicon level for 0.1-compatibility (absent reads as 'list'); 0.2+ writers populate it explicitly."
           },
           "members": {
             "type": "array",

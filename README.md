@@ -31,7 +31,7 @@ by [kryphocron], a privacy-first ATProto substrate.
 
 ## Namespace
 
-All lexicons live under `tools.kryphocron.*`. v0.1 ships eight:
+All lexicons live under `tools.kryphocron.*`. The crate ships eight:
 
 | NSID | Tier | Notes |
 | --- | --- | --- |
@@ -47,6 +47,26 @@ All lexicons live under `tools.kryphocron.*`. v0.1 ships eight:
 The Public / Private distinction is enforced structurally at
 the type level by the kryphocron crate. This crate is the
 build-time-authoritative source for which NSID is in which tier.
+
+## What's new in 0.3
+
+`tools.kryphocron.feed.postPrivate` gains optional fields:
+
+- `publicCompanion` — an AT-URI pairing a private post with a
+  public-tier companion record.
+- `encodedContent` (with `encodedContentCodec` and
+  `encodedContentGeneration`) — inline codec output for at-rest
+  content transforms, in place of `text`. Exactly one of `text`
+  or `encodedContent` is present per record.
+
+`tools.kryphocron.policy.audience` gains an optional `mode` field
+(`list`, `everyone`, `followers`, `following`, `nobody`);
+`members` and `name` are now optional.
+
+**Breaking:** `postPrivate.audienceList` is now an `at-uri`
+string (it was a record-def ref that codegenned to an embedded
+object). Consumers parsing 0.2 records as an embedded object must
+parse 0.3 records as an `at://…` string.
 
 ## Relationship to kryphocron
 
@@ -107,9 +127,10 @@ Install the codegen binary before `cargo build`:
 - Build-time three-way consistency check between lexicon JSON,
   the manifest, and the codegen output. Mismatch in any
   direction is a build failure.
-- §5.4 invariant enforcement: every private-tier lexicon either
-  declares `audienceList` ref to `tools.kryphocron.policy.audience`
-  or carries `audience_exempt: true` with a non-empty
+- Private-tier structural enforcement: every private-tier lexicon
+  either declares an `audienceList` reference (an `at-uri` string
+  pointing at a `tools.kryphocron.policy.audience` record) or
+  carries `audience_exempt: true` with a non-empty
   `exemption_reason`. Enforced in `build.rs` and shadow-checked in
   `tests/lexicon_invariants.rs`.
 - `.kryphocron-manifest.lock` — monotonic lockfile pinning tier,
@@ -131,7 +152,7 @@ Install the codegen binary before `cargo build`:
   shape. A `proto-blue-codegen` minor bump that changes the
   emitted types is a breaking change for downstream consumers
   and will be released as a `kryphocron-lexicons` minor bump.
-- The §5.2 primary library-API integration path for
+- The primary library-API integration path for
   `proto-blue-codegen` is blocked on upstream exposing a
   `lib.rs`; until then, the build uses the subprocess fallback
   (see [Build prerequisites](#build-prerequisites)).

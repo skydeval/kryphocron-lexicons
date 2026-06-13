@@ -39,19 +39,11 @@ fn post_private_record() -> &'static LexRecord {
     }
 }
 
-/// A conformant `audienceList` value. (The ref resolves to the
-/// `policy.audience` record def, so proto-blue treats its content
-/// permissively; a realistic object is used for clarity.)
+/// A conformant `audienceList` value. The field is an at-uri string
+/// referencing a `policy.audience` record (consulted at read time),
+/// not an embedded object.
 fn audience_value() -> LexValue {
-    let mut m: BTreeMap<String, LexValue> = BTreeMap::new();
-    m.insert("name".to_string(), LexValue::from("close friends"));
-    m.insert(
-        "members".to_string(),
-        LexValue::from(vec![LexValue::from("did:plc:z72i7hdynmk6r22z27h6tvur")]),
-    );
-    m.insert("createdAt".to_string(), LexValue::from("2026-05-31T12:30:00Z"));
-    m.insert("updatedAt".to_string(), LexValue::from("2026-05-31T12:30:00Z"));
-    LexValue::from(m)
+    LexValue::from("at://did:plc:z72i7hdynmk6r22z27h6tvur/tools.kryphocron.policy.audience/3kaudiencelist01")
 }
 
 #[test]
@@ -76,14 +68,16 @@ fn validate_record_rejects_missing_required_field() {
     let lexicons = kryphocron_lexicons::lexicons();
     let rec = post_private_record();
 
-    // `text` is required by postPrivate#main; omitting it must fail.
+    // `audienceList` is required by postPrivate#main; omitting it must fail.
+    // (`text` is optional as of 0.3.0 — a record may carry `encodedContent`
+    // instead — so its absence is no longer a validation failure.)
     let mut m: BTreeMap<String, LexValue> = BTreeMap::new();
+    m.insert("text".to_string(), LexValue::from("a private post"));
     m.insert("createdAt".to_string(), LexValue::from("2026-05-31T12:30:00Z"));
-    m.insert("audienceList".to_string(), audience_value());
     let value = LexValue::from(m);
 
     assert!(
         validate_record(lexicons, rec, &value).is_err(),
-        "expected a postPrivate value missing the required `text` field to fail validation"
+        "expected a postPrivate value missing the required `audienceList` field to fail validation"
     );
 }

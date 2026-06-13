@@ -21,8 +21,9 @@
 //!    `version.json`. Stale committed lockfile fails with a
 //!    regenerate-and-commit instruction.
 //! 6. Private-tier structural validation (§5.4): every private-tier
-//!    lexicon must declare an `audienceList: ref<...policy.audience>`
-//!    field unless the manifest entry carries `audience_exempt: true`
+//!    lexicon must declare an `audienceList` field — a string with
+//!    `at-uri` format referencing a `policy.audience` record —
+//!    unless the manifest entry carries `audience_exempt: true`
 //!    with an `exemption_reason`. Exemption is only valid for
 //!    substrate-class capabilities or implicit-substrate-trust oracle
 //!    consumers.
@@ -614,7 +615,7 @@ fn validate_private_tier_audience_refs(
             BuildError::ManifestParse(format!("private-tier NSID `{nsid}` has no lexicon JSON"))
         })?;
 
-        if !lexicon_declares_audience_ref(doc, AUDIENCE_REF) {
+        if !lexicon_declares_audience_ref(doc) {
             return Err(BuildError::PrivateLexiconMissingAudienceRef {
                 nsid: nsid.clone(),
                 expected_ref: AUDIENCE_REF.to_string(),
@@ -625,7 +626,7 @@ fn validate_private_tier_audience_refs(
     Ok(())
 }
 
-fn lexicon_declares_audience_ref(doc: &LexiconDoc, target: &str) -> bool {
+fn lexicon_declares_audience_ref(doc: &LexiconDoc) -> bool {
     use proto_blue_lexicon::types::{LexObject, LexUserType};
 
     let Some(main) = doc.defs.get("main") else {
@@ -638,10 +639,20 @@ fn lexicon_declares_audience_ref(doc: &LexiconDoc, target: &str) -> bool {
         _ => return false,
     };
 
-    object.properties.values().any(|prop| match prop {
-        LexUserType::Ref(r) => r.ref_target == target,
-        _ => false,
-    })
+    // Private-tier lexicons must declare an `audienceList` field that is an
+    // AT-URI reference to a tools.kryphocron.policy.audience record. Per
+    // KRYPHOCRON_CRATE_DESIGN.md:4244,4252-4255,4392-4399 the reference is a
+    // live read-time pointer (not an embedded snapshot), encoded at the
+    // lexicon level as a string with at-uri format. CRATE_DESIGN.md:3636-3642
+    // specifies the rule checks the field's presence and reference-target,
+    // not its exact type identity — so we match the conventional field name
+    // carrying the at-uri format rather than a record-def ref. The field name
+    // is matched explicitly because other at-uri-string fields (e.g.
+    // publicCompanion) are not audience references.
+    matches!(
+        object.properties.get("audienceList"),
+        Some(LexUserType::String(s)) if s.format.as_deref() == Some("at-uri")
+    )
 }
 
 // ============================================================
@@ -1048,11 +1059,12 @@ impl std::fmt::Display for BuildError {
             BuildError::PrivateLexiconMissingAudienceRef { nsid, expected_ref } => write!(
                 f,
                 "private-tier lexicon `{nsid}` does not declare an audience-list reference field \
-                 (`audienceList: ref<{expected_ref}>`).\n\
+                 (`audienceList: string<format:at-uri>` referencing a `{expected_ref}` record).\n\
                  \n\
-                 Private-tier lexicons must declare audience gating per §5.4 to be structurally \
-                 consistent with their tier classification. Lexicons that are operator-internal \
-                 infrastructure may set `audience_exempt: true` in their manifest entry with an \
+                 Private-tier lexicons must declare audience gating per §5.4 as an AT-URI \
+                 reference to a `{expected_ref}` record, to be structurally consistent with \
+                 their tier classification. Lexicons that are operator-internal infrastructure \
+                 may set `audience_exempt: true` in their manifest entry with an \
                  `exemption_reason` documenting the substrate-class capability or oracle that \
                  gates access."
             ),

@@ -1,0 +1,47 @@
+{
+  "lexicon": 1,
+  "id": "tools.kryphocron.policy.deleteAudience",
+  "defs": {
+    "main": {
+      "type": "procedure",
+      "description": "Delete a policy.audience record from the writer's own repository. Posts that still name the audience are then readable by their authors only.",
+      "input": {
+        "encoding": "application/json",
+        "schema": {
+          "type": "object",
+          "required": ["repo", "rkey"],
+          "properties": {
+            "repo": {
+              "type": "string",
+              "format": "did",
+              "description": "DID of the writer's repository. Must be the authenticated account."
+            },
+            "rkey": {
+              "type": "string",
+              "format": "record-key",
+              "description": "Record key of the audience to delete.",
+              "maxLength": 512
+            }
+          }
+        }
+      },
+      "output": {
+        "encoding": "application/json",
+        "schema": {
+          "type": "object",
+          "properties": {}
+        }
+      },
+      "errors": [
+        {
+          "name": "InvalidRequest",
+          "description": "The request is malformed."
+        },
+        {
+          "name": "Forbidden",
+          "description": "The caller may not write to this repository, or the host does not allow this account private-tier writes."
+        }
+      ]
+    }
+  }
+}

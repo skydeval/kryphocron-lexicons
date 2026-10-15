@@ -1,7 +1,8 @@
 //! # kryphocron-lexicons — companion lexicon crate
 //!
 //! Companion crate to [kryphocron]. Ships the eight v1 ATProto
-//! lexicons under `tools.kryphocron.*`, the substrate-specific
+//! record lexicons and six procedure lexicons under
+//! `tools.kryphocron.*`, the substrate-specific
 //! sidecar manifest, the build-time three-way registry
 //! consistency check, and the [`KRYPHOCRON_LEXICON_REGISTRY`]
 //! constant the kryphocron crate consumes as its compiled-in,

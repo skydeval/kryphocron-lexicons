@@ -201,6 +201,68 @@ fn private_tier_lexicons_satisfy_section_5_4_rule() {
     }
 }
 
+/// The procedure lexicons. They carry no tier, so they are absent from
+/// the registry, but ship as JSON and load through `lexicons()`.
+fn procedure_nsids() -> Vec<&'static str> {
+    vec![
+        "tools.kryphocron.feed.createPostPrivate",
+        "tools.kryphocron.feed.updatePostPrivate",
+        "tools.kryphocron.feed.deletePostPrivate",
+        "tools.kryphocron.actor.participatePrivate",
+        "tools.kryphocron.policy.manageAudience",
+        "tools.kryphocron.policy.deleteAudience",
+    ]
+}
+
+#[test]
+fn procedures_ship_outside_the_registry() {
+    use proto_blue_lexicon::types::LexUserType;
+
+    let manifest_raw = fs::read_to_string(
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("kryphocron-manifest.json"),
+    )
+    .unwrap();
+    let manifest: serde_json::Value = serde_json::from_str(&manifest_raw).unwrap();
+    let lexicons = kryphocron_lexicons::lexicons();
+
+    for nsid_str in procedure_nsids() {
+        let entry = &manifest["lexicons"][nsid_str];
+        assert_eq!(entry["kind"], "procedure", "{nsid_str}: manifest kind");
+        assert!(entry.get("tier").is_none(), "{nsid_str}: procedures carry no tier");
+
+        assert!(
+            matches!(
+                lexicons.get_def(&format!("{nsid_str}#main")),
+                Some(LexUserType::Procedure(_))
+            ),
+            "{nsid_str}: loads through lexicons() as a procedure",
+        );
+
+        assert!(
+            KRYPHOCRON_LEXICON_REGISTRY.iter().all(|e| e.nsid != nsid_str),
+            "{nsid_str}: not in the tier registry",
+        );
+        assert!(matches!(
+            Tier::from_nsid(&Nsid::new(nsid_str).unwrap()),
+            Err(UnknownNsid::NotRegistered(_)),
+        ));
+    }
+
+    // Every manifest entry is either a v1 record or a listed procedure,
+    // so a new entry has to be classified in one of the two lists.
+    let mut known: Vec<&str> = v1_nsids().into_iter().map(|(n, _)| n).collect();
+    known.extend(procedure_nsids());
+    known.sort_unstable();
+    let mut in_manifest: Vec<&str> = manifest["lexicons"]
+        .as_object()
+        .unwrap()
+        .keys()
+        .map(String::as_str)
+        .collect();
+    in_manifest.sort_unstable();
+    assert_eq!(in_manifest, known, "manifest = v1 records + procedures");
+}
+
 #[test]
 fn codegen_hash_is_a_64_char_lowercase_hex_string() {
     use kryphocron_lexicons::KRYPHOCRON_CODEGEN_HASH;

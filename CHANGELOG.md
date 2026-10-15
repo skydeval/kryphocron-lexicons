@@ -9,6 +9,23 @@ convention.
 [Keep a Changelog]: https://keepachangelog.com/en/1.1.0/
 [Semantic Versioning]: https://semver.org/spec/v2.0.0.html
 
+## [0.3.1] — 2026-10-15
+
+### Added
+- `postPublic#embedVideo` (with `#caption`) and `postPublic#embedRecordWithMedia` (a quoted record plus images, video or a link card), both in `postPrivate`'s `embed` union. Shapes mirror `app.bsky.embed.video` and `app.bsky.embed.recordWithMedia`.
+- `postPublic#embedGallery` (up to 20 `#galleryImage` items, each with a required `aspectRatio`), in `postPrivate`'s `embed` union and `#embedRecordWithMedia`'s `media` union. Mirrors `app.bsky.embed.gallery`.
+- `postPublic#aspectRatio`; `#image` gains optional `aspectRatio`. `#external` gains optional `thumb` (image blob, max 1 MB).
+- `postPrivate.langs` (up to three language tags) and `postPrivate.labels` (`postPublic#selfLabels`), mirroring `app.bsky.feed.post`.
+- Procedure lexicons for the private-tier write endpoints: `feed.createPostPrivate`, `feed.updatePostPrivate`, `feed.deletePostPrivate`, `actor.participatePrivate`, `policy.manageAudience`, `policy.deleteAudience`. They ship as JSON and load through `lexicons()`; they are not in the registry or lockfile, and no Rust codegen is emitted for them.
+- Manifest entries take an optional `kind` (`record`, the default, or `procedure`). The build checks it against the lexicon's `main` def, requires a tier on records and rejects tier fields on procedures.
+
+### Changed
+- `postPublic#image` blob `maxSize` raised from 1 MB to 2 MB, matching `app.bsky.embed.images`.
+- Codegen output is cleared before each build, so a removed lexicon can no longer leave stale generated files behind.
+
+### Note for Rust consumers
+- The generated `Main` structs and embed enums gain fields and variants. Code that constructs them with struct literals or matches them exhaustively needs updating; deserialization and field access are unaffected.
+
 ## [0.3.0] — 2026-06-13
 
 ### Added

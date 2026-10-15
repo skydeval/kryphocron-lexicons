@@ -54,7 +54,10 @@
             "refs": [
               "tools.kryphocron.feed.postPublic#embedImage",
               "tools.kryphocron.feed.postPublic#embedExternal",
-              "tools.kryphocron.feed.postPublic#embedRecord"
+              "tools.kryphocron.feed.postPublic#embedRecord",
+              "tools.kryphocron.feed.postPublic#embedGallery",
+              "tools.kryphocron.feed.postPublic#embedVideo",
+              "tools.kryphocron.feed.postPublic#embedRecordWithMedia"
             ]
           },
           "facets": {
@@ -63,6 +66,20 @@
               "type": "ref",
               "ref": "tools.kryphocron.feed.postPublic#facet"
             }
+          },
+          "langs": {
+            "type": "array",
+            "description": "Languages the post is written in.",
+            "maxLength": 3,
+            "items": {
+              "type": "string",
+              "format": "language"
+            }
+          },
+          "labels": {
+            "type": "union",
+            "description": "Self-applied content labels.",
+            "refs": ["tools.kryphocron.feed.postPublic#selfLabels"]
           }
         }
       }

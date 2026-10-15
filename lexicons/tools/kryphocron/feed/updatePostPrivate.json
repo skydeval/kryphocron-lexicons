@@ -1,0 +1,76 @@
+{
+  "lexicon": 1,
+  "id": "tools.kryphocron.feed.updatePostPrivate",
+  "defs": {
+    "main": {
+      "type": "procedure",
+      "description": "Change the audience of an existing postPrivate record in the writer's own repository. Only audienceList changes; the URI stays the same and the record CID changes. Replies are refused, since a reply's audience is its thread's.",
+      "input": {
+        "encoding": "application/json",
+        "schema": {
+          "type": "object",
+          "required": ["repo", "rkey", "audienceList"],
+          "properties": {
+            "repo": {
+              "type": "string",
+              "format": "did",
+              "description": "DID of the writer's repository. Must be the authenticated account."
+            },
+            "rkey": {
+              "type": "string",
+              "format": "record-key",
+              "description": "Record key of the post to update.",
+              "maxLength": 512
+            },
+            "audienceList": {
+              "type": "string",
+              "format": "at-uri",
+              "description": "AT-URI of one of the writer's own policy.audience records."
+            },
+            "swapRecord": {
+              "type": "string",
+              "format": "cid",
+              "description": "Compare and swap with the post's current record CID."
+            }
+          }
+        }
+      },
+      "output": {
+        "encoding": "application/json",
+        "schema": {
+          "type": "object",
+          "required": ["uri", "cid"],
+          "properties": {
+            "uri": {
+              "type": "string",
+              "format": "at-uri"
+            },
+            "cid": {
+              "type": "string",
+              "format": "cid",
+              "description": "CID of the updated record."
+            }
+          }
+        }
+      },
+      "errors": [
+        {
+          "name": "InvalidRequest",
+          "description": "The post does not exist or is a reply, or audienceList does not name an existing audience record of the writer's."
+        },
+        {
+          "name": "Forbidden",
+          "description": "The caller may not write to this repository, or the host does not allow this account private-tier writes."
+        },
+        {
+          "name": "UnsupportedNamespace",
+          "description": "The host does not have the private tier enabled."
+        },
+        {
+          "name": "InvalidSwap",
+          "description": "swapRecord did not match the post's current record CID."
+        }
+      ]
+    }
+  }
+}

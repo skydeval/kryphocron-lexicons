@@ -91,11 +91,111 @@
         "image": {
           "type": "blob",
           "accept": ["image/*"],
-          "maxSize": 1000000
+          "maxSize": 2000000
         },
         "alt": {
           "type": "string",
           "description": "Alt-text for accessibility."
+        },
+        "aspectRatio": {
+          "type": "ref",
+          "ref": "#aspectRatio"
+        }
+      }
+    },
+    "embedGallery": {
+      "type": "object",
+      "required": ["items"],
+      "properties": {
+        "items": {
+          "type": "array",
+          "description": "Gallery items. The schema ceiling of 20 is future-proofing; authoring clients should currently limit galleries to 10 items.",
+          "items": {
+            "type": "union",
+            "refs": ["#galleryImage"]
+          },
+          "maxLength": 20
+        }
+      }
+    },
+    "galleryImage": {
+      "type": "object",
+      "required": ["image", "alt", "aspectRatio"],
+      "properties": {
+        "image": {
+          "type": "blob",
+          "accept": ["image/*"],
+          "maxSize": 2000000
+        },
+        "alt": {
+          "type": "string",
+          "description": "Alt-text for accessibility."
+        },
+        "aspectRatio": {
+          "type": "ref",
+          "ref": "#aspectRatio"
+        }
+      }
+    },
+    "aspectRatio": {
+      "type": "object",
+      "description": "Width and height of an image or video. Only the ratio is meaningful; units are arbitrary.",
+      "required": ["width", "height"],
+      "properties": {
+        "width": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "embedVideo": {
+      "type": "object",
+      "required": ["video"],
+      "properties": {
+        "video": {
+          "type": "blob",
+          "accept": ["video/mp4"],
+          "maxSize": 300000000
+        },
+        "captions": {
+          "type": "array",
+          "items": {
+            "type": "ref",
+            "ref": "#caption"
+          },
+          "maxLength": 20
+        },
+        "alt": {
+          "type": "string",
+          "description": "Alt-text for accessibility."
+        },
+        "aspectRatio": {
+          "type": "ref",
+          "ref": "#aspectRatio"
+        },
+        "presentation": {
+          "type": "string",
+          "description": "Presentation hint for clients.",
+          "knownValues": ["default", "gif"]
+        }
+      }
+    },
+    "caption": {
+      "type": "object",
+      "required": ["lang", "file"],
+      "properties": {
+        "lang": {
+          "type": "string",
+          "format": "language"
+        },
+        "file": {
+          "type": "blob",
+          "accept": ["text/vtt"],
+          "maxSize": 20000
         }
       }
     },
@@ -122,6 +222,11 @@
         },
         "description": {
           "type": "string"
+        },
+        "thumb": {
+          "type": "blob",
+          "accept": ["image/*"],
+          "maxSize": 1000000
         }
       }
     },
@@ -132,6 +237,46 @@
         "record": {
           "type": "ref",
           "ref": "#strongRef"
+        }
+      }
+    },
+    "embedRecordWithMedia": {
+      "type": "object",
+      "required": ["record", "media"],
+      "properties": {
+        "record": {
+          "type": "ref",
+          "ref": "#embedRecord"
+        },
+        "media": {
+          "type": "union",
+          "refs": ["#embedImage", "#embedGallery", "#embedVideo", "#embedExternal"]
+        }
+      }
+    },
+    "selfLabels": {
+      "type": "object",
+      "description": "Content labels applied by the record's author.",
+      "required": ["values"],
+      "properties": {
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "ref",
+            "ref": "#selfLabel"
+          },
+          "maxLength": 10
+        }
+      }
+    },
+    "selfLabel": {
+      "type": "object",
+      "required": ["val"],
+      "properties": {
+        "val": {
+          "type": "string",
+          "description": "The label value.",
+          "maxLength": 128
         }
       }
     },

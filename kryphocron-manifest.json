@@ -38,6 +38,30 @@
       "lexicon_version": "1.0.0",
       "audience_exempt": true,
       "exemption_reason": "is the audience mechanism itself; not a consumer of one (§5.4 explicit exemption)"
+    },
+    "tools.kryphocron.feed.createPostPrivate": {
+      "kind": "procedure",
+      "lexicon_version": "1.0.0"
+    },
+    "tools.kryphocron.feed.updatePostPrivate": {
+      "kind": "procedure",
+      "lexicon_version": "1.0.0"
+    },
+    "tools.kryphocron.feed.deletePostPrivate": {
+      "kind": "procedure",
+      "lexicon_version": "1.0.0"
+    },
+    "tools.kryphocron.actor.participatePrivate": {
+      "kind": "procedure",
+      "lexicon_version": "1.0.0"
+    },
+    "tools.kryphocron.policy.manageAudience": {
+      "kind": "procedure",
+      "lexicon_version": "1.0.0"
+    },
+    "tools.kryphocron.policy.deleteAudience": {
+      "kind": "procedure",
+      "lexicon_version": "1.0.0"
     }
   }
 }

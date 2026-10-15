@@ -1,0 +1,74 @@
+{
+  "lexicon": 1,
+  "id": "tools.kryphocron.actor.participatePrivate",
+  "defs": {
+    "main": {
+      "type": "procedure",
+      "description": "Create a postPrivate reply under another account's audience. The record must carry reply.parent and an audienceList naming the audience record of the post being replied to; the writer is checked against that audience before the write. Every audience refusal returns the same Forbidden response.",
+      "input": {
+        "encoding": "application/json",
+        "schema": {
+          "type": "object",
+          "required": ["repo", "record"],
+          "properties": {
+            "repo": {
+              "type": "string",
+              "format": "did",
+              "description": "DID of the writer's repository. Must be the authenticated account."
+            },
+            "rkey": {
+              "type": "string",
+              "format": "record-key",
+              "description": "Record key. A TID is generated when absent.",
+              "maxLength": 512
+            },
+            "validate": {
+              "type": "boolean",
+              "description": "Lexicon validation preference, as for com.atproto.repo.createRecord."
+            },
+            "record": {
+              "type": "ref",
+              "ref": "tools.kryphocron.feed.postPrivate"
+            }
+          }
+        }
+      },
+      "output": {
+        "encoding": "application/json",
+        "schema": {
+          "type": "object",
+          "required": ["uri", "cid"],
+          "properties": {
+            "uri": {
+              "type": "string",
+              "format": "at-uri"
+            },
+            "cid": {
+              "type": "string",
+              "format": "cid",
+              "description": "CID of the written record."
+            }
+          }
+        }
+      },
+      "errors": [
+        {
+          "name": "InvalidRequest",
+          "description": "The record is malformed, or lacks reply.parent or audienceList."
+        },
+        {
+          "name": "Forbidden",
+          "description": "The caller may not write to this repository, the host does not allow this account private-tier writes, or the audience check denied the reply."
+        },
+        {
+          "name": "UnsupportedNamespace",
+          "description": "The host does not have the private tier enabled."
+        },
+        {
+          "name": "BlobNotFound",
+          "description": "An embed references a blob the host does not hold."
+        }
+      ]
+    }
+  }
+}

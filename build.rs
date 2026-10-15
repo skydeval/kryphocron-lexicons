@@ -87,10 +87,13 @@ fn run() -> Result<(), BuildError> {
     let parsed_lexicons = parse_lexicons(&lexicon_files)?;
 
     // ---- Run codegen ----
+    // Procedures are excluded: their codegen is an XRPC client that would
+    // pull an HTTP stack into this crate. They ship as JSON only.
+    let (codegen_in, codegen_input_nsids) =
+        stage_codegen_inputs(&lexicons_dir, &lexicon_files, &out_dir)?;
     let codegen_out = out_dir.join("codegen-output");
-    fs::create_dir_all(&codegen_out)
-        .map_err(|e| BuildError::Io(format!("create codegen-output dir: {e}")))?;
-    run_codegen(&lexicons_dir, &codegen_out)?;
+    reset_dir(&codegen_out)?;
+    run_codegen(&codegen_in, &codegen_out)?;
     let codegen_nsids = discover_codegen_nsids(&codegen_out)?;
 
     // ---- Three-way consistency (§5.3) ----
@@ -99,7 +102,15 @@ fn run() -> Result<(), BuildError> {
     let manifest_nsids: BTreeSet<String> =
         manifest.lexicons.keys().cloned().collect();
 
-    three_way_consistency_check(&lexicon_nsids, &manifest_nsids, &codegen_nsids)?;
+    three_way_consistency_check(
+        &lexicon_nsids,
+        &manifest_nsids,
+        &codegen_input_nsids,
+        &codegen_nsids,
+    )?;
+
+    // ---- Manifest kind vs lexicon main-def type ----
+    validate_manifest_kinds(&manifest, &parsed_lexicons)?;
 
     // ---- Lockfile validation (§5.4) ----
     let updated_lockfile = validate_lockfile(&manifest, &lockfile, &version_doc)?;
@@ -193,10 +204,35 @@ struct Manifest {
     lexicons: BTreeMap<String, ManifestEntry>,
 }
 
+/// What a manifest entry describes. Records carry a tier and populate
+/// the registry and lockfile; procedures carry no tier and are shipped
+/// as lexicon JSON only, with no codegen.
+#[derive(Debug, Deserialize, Default, Clone, Copy, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+enum LexiconKind {
+    #[default]
+    Record,
+    Procedure,
+}
+
+impl LexiconKind {
+    fn as_str(self) -> &'static str {
+        match self {
+            LexiconKind::Record => "record",
+            LexiconKind::Procedure => "procedure",
+        }
+    }
+}
+
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 struct ManifestEntry {
-    tier: String,
+    #[serde(default)]
+    kind: LexiconKind,
+    // Required for records, forbidden for procedures; enforced by
+    // `validate_manifest_kinds`.
+    #[serde(default)]
+    tier: Option<String>,
     // §5.4 commits per-lexicon version on every entry; we
     // deserialize it to enforce its presence as a structural
     // schema check (deserialize fails if absent), but v0.1 does
@@ -296,6 +332,55 @@ fn parse_lexicons(paths: &[PathBuf]) -> Result<BTreeMap<String, LexiconDoc>, Bui
 // Codegen subprocess invocation (§5.2 fallback path).
 // ============================================================
 
+/// Remove and recreate `dir`, so output from an earlier build (for
+/// example, a lexicon since removed) cannot leak into this one.
+fn reset_dir(dir: &Path) -> Result<(), BuildError> {
+    if dir.exists() {
+        fs::remove_dir_all(dir)
+            .map_err(|e| BuildError::Io(format!("remove {}: {e}", dir.display())))?;
+    }
+    fs::create_dir_all(dir)
+        .map_err(|e| BuildError::Io(format!("create {}: {e}", dir.display())))
+}
+
+/// Copy every non-procedure lexicon into `OUT_DIR/codegen-input/`,
+/// keeping its path relative to `lexicons/`, and return that directory
+/// with the NSIDs staged.
+fn stage_codegen_inputs(
+    lexicons_dir: &Path,
+    lexicon_files: &[PathBuf],
+    out_dir: &Path,
+) -> Result<(PathBuf, BTreeSet<String>), BuildError> {
+    use proto_blue_lexicon::types::LexUserType;
+
+    let staging = out_dir.join("codegen-input");
+    reset_dir(&staging)?;
+    let mut nsids = BTreeSet::new();
+    for path in lexicon_files {
+        let raw = fs::read_to_string(path)
+            .map_err(|e| BuildError::Io(format!("read {}: {e}", path.display())))?;
+        let doc: LexiconDoc = serde_json::from_str(&raw).map_err(|e| BuildError::LexiconParse {
+            path: path.display().to_string(),
+            detail: format!("{e}"),
+        })?;
+        if matches!(doc.defs.get("main"), Some(LexUserType::Procedure(_))) {
+            continue;
+        }
+        let rel = path.strip_prefix(lexicons_dir).map_err(|e| {
+            BuildError::Io(format!("{} outside lexicons/: {e}", path.display()))
+        })?;
+        let dest = staging.join(rel);
+        if let Some(parent) = dest.parent() {
+            fs::create_dir_all(parent)
+                .map_err(|e| BuildError::Io(format!("create {}: {e}", parent.display())))?;
+        }
+        fs::write(&dest, raw)
+            .map_err(|e| BuildError::Io(format!("write {}: {e}", dest.display())))?;
+        nsids.insert(doc.id);
+    }
+    Ok((staging, nsids))
+}
+
 fn run_codegen(lexicons_dir: &Path, out_dir: &Path) -> Result<(), BuildError> {
     let codegen_binary = which::which("proto-blue-codegen").map_err(|_| {
         BuildError::CodegenBinaryMissing
@@ -370,9 +455,12 @@ where
 // Three-way consistency (§5.3).
 // ============================================================
 
+/// `codegen_expected` is the subset of `lexicon` handed to codegen
+/// (everything but procedures); the codegen output must match it.
 fn three_way_consistency_check(
     lexicon: &BTreeSet<String>,
     manifest: &BTreeSet<String>,
+    codegen_expected: &BTreeSet<String>,
     codegen: &BTreeSet<String>,
 ) -> Result<(), BuildError> {
     let lexicon_minus_manifest: Vec<String> =
@@ -380,9 +468,9 @@ fn three_way_consistency_check(
     let manifest_minus_lexicon: Vec<String> =
         manifest.difference(lexicon).cloned().collect();
     let lexicon_minus_codegen: Vec<String> =
-        lexicon.difference(codegen).cloned().collect();
+        codegen_expected.difference(codegen).cloned().collect();
     let codegen_minus_lexicon: Vec<String> =
-        codegen.difference(lexicon).cloned().collect();
+        codegen.difference(codegen_expected).cloned().collect();
 
     if lexicon_minus_manifest.is_empty()
         && manifest_minus_lexicon.is_empty()
@@ -397,6 +485,62 @@ fn three_way_consistency_check(
         manifest_minus_lexicon,
         lexicon_minus_codegen,
         codegen_minus_lexicon,
+    })
+}
+
+// ============================================================
+// Manifest kind validation.
+// ============================================================
+
+/// Every manifest entry's `kind` must match its lexicon's `main` def
+/// type. Records must carry a tier; procedures must carry no tier and
+/// no audience exemption, since both are record-tier concepts.
+fn validate_manifest_kinds(
+    manifest: &Manifest,
+    parsed_lexicons: &BTreeMap<String, LexiconDoc>,
+) -> Result<(), BuildError> {
+    use proto_blue_lexicon::types::LexUserType;
+
+    for (nsid, entry) in &manifest.lexicons {
+        let doc = parsed_lexicons.get(nsid).ok_or_else(|| {
+            BuildError::ManifestParse(format!("manifest NSID `{nsid}` has no lexicon JSON"))
+        })?;
+        let main_type = doc.defs.get("main").map_or("none", LexUserType::type_name);
+        let main_matches = matches!(
+            (entry.kind, doc.defs.get("main")),
+            (LexiconKind::Record, Some(LexUserType::Record(_)))
+                | (LexiconKind::Procedure, Some(LexUserType::Procedure(_)))
+        );
+        if !main_matches {
+            return Err(BuildError::KindMismatch {
+                nsid: nsid.clone(),
+                kind: entry.kind.as_str(),
+                main_type: main_type.to_string(),
+            });
+        }
+        match entry.kind {
+            LexiconKind::Record if entry.tier.is_none() => {
+                return Err(BuildError::RecordMissingTier(nsid.clone()));
+            }
+            LexiconKind::Procedure
+                if entry.tier.is_some()
+                    || entry.audience_exempt
+                    || entry.exemption_reason.is_some() =>
+            {
+                return Err(BuildError::ProcedureCarriesTierFields(nsid.clone()));
+            }
+            _ => {}
+        }
+    }
+    Ok(())
+}
+
+/// Record entries with their tier. Only valid after
+/// `validate_manifest_kinds` has run.
+fn record_entries(manifest: &Manifest) -> impl Iterator<Item = (&String, &ManifestEntry, &str)> {
+    manifest.lexicons.iter().filter_map(|(nsid, entry)| match entry.kind {
+        LexiconKind::Record => entry.tier.as_deref().map(|tier| (nsid, entry, tier)),
+        LexiconKind::Procedure => None,
     })
 }
 
@@ -419,9 +563,9 @@ fn validate_lockfile(
         lexicons: BTreeMap::new(),
     };
 
-    for (nsid, entry) in &manifest.lexicons {
+    for (nsid, entry, tier) in record_entries(manifest) {
         let new_lock = LockEntry {
-            tier_locked: entry.tier.clone(),
+            tier_locked: tier.to_string(),
             deprecated_in_locked: entry.deprecated_in.clone(),
             successor_locked: entry.successor.clone(),
             first_seen_in_lexicon_set_version: prior
@@ -588,8 +732,8 @@ fn validate_private_tier_audience_refs(
 ) -> Result<(), BuildError> {
     const AUDIENCE_REF: &str = "tools.kryphocron.policy.audience";
 
-    for (nsid, entry) in &manifest.lexicons {
-        if entry.tier != "private" {
+    for (nsid, entry, tier) in record_entries(manifest) {
+        if tier != "private" {
             continue;
         }
 
@@ -749,11 +893,12 @@ fn write_registry(
         "pub const KRYPHOCRON_LEXICON_REGISTRY: &[crate::LexiconRegistryEntry] = &[\n",
     );
 
-    let mut entries: Vec<(&String, &ManifestEntry)> = manifest.lexicons.iter().collect();
+    // Procedures carry no tier and are not part of the registry.
+    let mut entries: Vec<(&String, &ManifestEntry, &str)> = record_entries(manifest).collect();
     entries.sort_by(|a, b| a.0.cmp(b.0));
 
-    for (nsid, entry) in &entries {
-        let tier_path = match entry.tier.as_str() {
+    for (nsid, entry, tier) in &entries {
+        let tier_path = match *tier {
             "public" => "crate::Tier::Public",
             "private" => "crate::Tier::Private",
             other => {
@@ -801,8 +946,8 @@ fn write_registry(
         "    pub fn from_nsid(nsid: &proto_blue_syntax::Nsid) -> Result<crate::Tier, crate::UnknownNsid> {\n",
     );
     s.push_str("        match nsid.as_str() {\n");
-    for (nsid, entry) in &entries {
-        let tier_path = match entry.tier.as_str() {
+    for (nsid, _, tier) in &entries {
+        let tier_path = match *tier {
             "public" => "crate::Tier::Public",
             "private" => "crate::Tier::Private",
             _ => unreachable!(),
@@ -942,6 +1087,13 @@ enum BuildError {
         nsid: String,
     },
     UnknownTier(String),
+    KindMismatch {
+        nsid: String,
+        kind: &'static str,
+        main_type: String,
+    },
+    RecordMissingTier(String),
+    ProcedureCarriesTierFields(String),
 }
 
 impl std::fmt::Display for BuildError {
@@ -1082,6 +1234,23 @@ impl std::fmt::Display for BuildError {
             BuildError::UnknownTier(t) => {
                 write!(f, "unrecognized tier value `{t}` (expected `public` or `private`)")
             }
+            BuildError::KindMismatch { nsid, kind, main_type } => write!(
+                f,
+                "manifest entry `{nsid}` has kind `{kind}` but its lexicon's `main` def is \
+                 `{main_type}`. Set `kind` to match the lexicon (`record` is the default; \
+                 procedures need `\"kind\": \"procedure\"`)."
+            ),
+            BuildError::RecordMissingTier(nsid) => write!(
+                f,
+                "record lexicon `{nsid}` has no `tier` in its manifest entry. Every record \
+                 must be classified `public` or `private`."
+            ),
+            BuildError::ProcedureCarriesTierFields(nsid) => write!(
+                f,
+                "procedure lexicon `{nsid}` carries `tier`, `audience_exempt` or \
+                 `exemption_reason` in its manifest entry. Tiers classify records; \
+                 remove these fields from the procedure entry."
+            ),
         }
     }
 }

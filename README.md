@@ -22,9 +22,9 @@ by [kryphocron], a privacy-first ATProto substrate.
   constant the kryphocron crate consumes as its build-time
   trust anchor for tier classification.
 - **`KRYPHOCRON_CODEGEN_HASH`** — a SHA-256 digest of the
-  concatenated codegen output. Hand-editing any generated file
-  produces a different hash; CI compares against the committed
-  value.
+  generated code, so two builds can be compared. The generated
+  code is never committed and is rebuilt from the lexicons on
+  every build, so a hand edit cannot survive a rebuild.
 - **Tier vocabulary** — `Tier`, `Visibility`, `SemVer`,
   `DeprecationState`, `LexiconRegistryEntry`, `UnknownNsid`,
   and `Tier::from_nsid`.
@@ -116,6 +116,12 @@ installed as a binary in the build environment. The codegen
 tool generates Rust types from the lexicon JSON files at
 build time.
 
+This applies to **every build that includes this crate**,
+including crates that depend on it directly or through
+kryphocron. The generated types are not shipped in the
+published crate; the build script regenerates them each time,
+and fails with the install command if the binary is missing.
+
 To install:
 
 ```bash
@@ -123,19 +129,17 @@ cargo install proto-blue-codegen --version '~0.3.1'
 ```
 
 **Why a binary, not a library dependency?** `proto-blue-codegen`
-ships as a CLI binary rather than a library crate, so downstream
-consumers building against kryphocron-lexicons don't pull
-lexicon-parsing infrastructure (the full `proto-blue-*` build-
-time tree) into their own build graph. The published
-kryphocron-lexicons crate ships the *already-generated* Rust
-types; only operators rebuilding the codegen output from source
-need the tool. If `proto-blue-codegen` later exposes a library
-API, the build script can swap to that path without a wire-
-format-touching change.
+0.3.x ships only as a CLI binary, with no library API to call
+from `build.rs`, so the build script runs it as a subprocess.
+If `proto-blue-codegen` later exposes a library API, the build
+script can call it in-process instead, and the installed binary
+will no longer be needed. That change does not touch the wire
+format.
 
 ### CI integration
 
-Install the codegen binary before `cargo build`:
+In any CI that builds this crate, or a crate depending on it,
+install the codegen binary before `cargo build`:
 
 ```yaml
 - name: Install proto-blue-codegen
@@ -152,7 +156,9 @@ Install the codegen binary before `cargo build`:
   at `kryphocron_lexicons::tools::*`.
 - `KRYPHOCRON_LEXICON_REGISTRY` — the build-time-authoritative
   registry constant consumed by the kryphocron crate.
-- `KRYPHOCRON_CODEGEN_HASH` — SHA-256 hand-edit-rejection hash.
+- `KRYPHOCRON_CODEGEN_HASH` — SHA-256 digest of the generated
+  code. It is published for comparison, not checked against a
+  committed value.
 - Build-time three-way consistency check between lexicon JSON,
   the manifest, and the codegen output. Mismatch in any
   direction is a build failure. Each manifest entry's `kind`

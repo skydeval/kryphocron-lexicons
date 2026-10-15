@@ -41,7 +41,7 @@ proto-blue-lex-data = "~0.3.1"
 proto-blue-lexicon = "~0.3.1"
 
 # Stable, deterministic SHA-256 hashing for the §5.3 generated-
-# code hand-edit rejection mechanism.
+# code digest (KRYPHOCRON_CODEGEN_HASH).
 sha2 = "0.10"
 
 # §9.5 structured error derivation.

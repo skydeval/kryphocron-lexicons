@@ -27,11 +27,11 @@
 //!    with an `exemption_reason`. Exemption is only valid for
 //!    substrate-class capabilities or implicit-substrate-trust oracle
 //!    consumers.
-//! 7. Hash-based hand-edit rejection (§5.3): the build emits a
-//!    SHA-256 digest of the concatenated codegen output. The
-//!    runtime crate exposes it as a constant; hand-editing any
-//!    generated file produces a different hash, which CI compares
-//!    against the committed value.
+//! 7. Codegen hash: the build emits a SHA-256 digest of the
+//!    codegen output, which the runtime crate exposes as a
+//!    constant for comparing builds. It is not checked against a
+//!    committed value; hand edits are prevented by regeneration,
+//!    since the output lives in OUT_DIR and is rebuilt every time.
 //! 8. Emit `OUT_DIR/codegen-entry.rs` (path-redirected entrypoint
 //!    that mounts the codegen output at `crate::tools`) and
 //!    `OUT_DIR/registry.rs` (the `KRYPHOCRON_LEXICON_REGISTRY`
@@ -874,10 +874,10 @@ fn write_registry(
     // ---- KRYPHOCRON_CODEGEN_HASH constant ----
     s.push_str("/// SHA-256 digest of the concatenated proto-blue-codegen output.\n");
     s.push_str("///\n");
-    s.push_str("/// Edit any file under the generated `tools` tree and the\n");
-    s.push_str("/// rebuilt hash differs. §5.3 hand-edit rejection: operators\n");
-    s.push_str("/// who genuinely need to extend generated types should do so via\n");
-    s.push_str("/// trait impls in separate modules.\n");
+    s.push_str("/// Published so two builds can be compared. The generated code is\n");
+    s.push_str("/// rebuilt from the lexicons on every build, so a hand edit cannot\n");
+    s.push_str("/// survive a rebuild; to extend generated types, add trait impls in\n");
+    s.push_str("/// separate modules instead.\n");
     s.push_str(&format!(
         "pub const KRYPHOCRON_CODEGEN_HASH: &str = {codegen_hash:?};\n\n"
     ));

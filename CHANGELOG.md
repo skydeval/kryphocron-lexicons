@@ -22,6 +22,10 @@ convention.
 ### Changed
 - `postPublic#image` blob `maxSize` raised from 1 MB to 2 MB, matching `app.bsky.embed.images`.
 - Codegen output is cleared before each build, so a removed lexicon can no longer leave stale generated files behind.
+- `version.json` lexicon-set version moved from `0.1.0` to `0.3.1`. It had not been bumped since 0.1.0; it now matches the crate version. Existing lockfile entries keep their `first_seen_in_lexicon_set_version`.
+
+### Fixed
+- README and `SECURITY.md` no longer claim the published crate ships pre-generated types or that `KRYPHOCRON_CODEGEN_HASH` is checked against a committed value. Every build, including downstream ones, needs `proto-blue-codegen` installed. `SECURITY.md` now lists 0.3.x as supported.
 
 ### Note for Rust consumers
 - The generated `Main` structs and embed enums gain fields and variants. Code that constructs them with struct literals or matches them exhaustively needs updating; deserialization and field access are unaffected.

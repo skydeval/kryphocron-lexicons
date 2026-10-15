@@ -77,7 +77,7 @@ pub use tier::{
 include!(concat!(env!("OUT_DIR"), "/codegen-entry.rs"));
 
 // `registry.rs` defines `KRYPHOCRON_CODEGEN_HASH` (the
-// hand-edit-rejection hash), `KRYPHOCRON_LEXICON_REGISTRY`, and
+// codegen-output digest), `KRYPHOCRON_LEXICON_REGISTRY`, and
 // the `impl Tier { pub fn from_nsid }` block.
 include!(concat!(env!("OUT_DIR"), "/registry.rs"));
 

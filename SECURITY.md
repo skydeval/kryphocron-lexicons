@@ -10,8 +10,8 @@ the kryphocron private disclosure channel.
 
 | Version | Supported |
 | ------- | --------- |
-| 0.2.x   | ✅        |
-| < 0.2   | ❌        |
+| 0.3.x   | ✅        |
+| < 0.3   | ❌        |
 
 ## Reporting
 
@@ -29,11 +29,12 @@ canonicalization — are in scope and welcome.
   produces a successful build with mismatched lexicon JSON,
   `kryphocron-manifest.json`, and codegen output. The §5.3
   check is supposed to fail loudly on drift in any direction.
-- **`KRYPHOCRON_CODEGEN_HASH` hand-edit-rejection bypass.** Any
-  path that produces a successful build with edited codegen
-  output where the committed hash is not regenerated. The §5.3
-  hash check is supposed to make hand-edits a structural
-  mismatch.
+- **Generated-code integrity.** Any path that produces a
+  successful build whose generated code differs from what the
+  shipped lexicon JSON produces — for example, edited codegen
+  output surviving a rebuild instead of being regenerated, or
+  `KRYPHOCRON_CODEGEN_HASH` not reflecting the code actually
+  compiled.
 - **§5.4 audience-invariant bypass.** Any path that ships a
   private-tier lexicon without `audienceList` enforcement or
   without `audience_exempt: true` plus a non-empty

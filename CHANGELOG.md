@@ -9,6 +9,11 @@ convention.
 [Keep a Changelog]: https://keepachangelog.com/en/1.1.0/
 [Semantic Versioning]: https://semver.org/spec/v2.0.0.html
 
+## [0.3.2] — unreleased
+
+### Added
+- `postPrivate.embedBlobs` (array of blobs), `postPrivate.mentionDids` (array of DIDs) and `postPrivate.quote` (`postPublic#strongRef`). An encoding host that carries a post's `facets` and `embed` inside `encodedContent` (aurora-locus #504) leaves these in the clear: the embed's blobs so it keeps them, and the mentioned DIDs and quoted record so AppViews can index mentions and quotes without decoding. All three are optional, derived from the encoded content, and absent when there is nothing to derive.
+
 ## [0.3.1] — 2026-10-15
 
 ### Added

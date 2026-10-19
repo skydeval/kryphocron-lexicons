@@ -31,6 +31,26 @@
             "description": "Optional per-record rotation generation mark. Stamped by the substrate from the resolved RotationOracle hint at encode time. Host rewrite-on-rotate jobs select records by `WHERE encodedContentGeneration < current_generation`. Matches the Rust-side RotationGenerationMark(BoundedString<128>) bound. Hosts MUST pick a lex-sortable encoding.",
             "maxLength": 128
           },
+          "embedBlobs": {
+            "type": "array",
+            "description": "Set by the encoding host when `encodedContent` carries the embed: every blob the embed references, so the host keeps them. Readers ignore it for display; the decoded embed is authoritative. Absent when the embed carries no blobs or is not encoded.",
+            "items": {
+              "type": "blob"
+            }
+          },
+          "mentionDids": {
+            "type": "array",
+            "description": "Set by the encoding host when `encodedContent` carries the facets: the DIDs of the post's mention facets, deduplicated, in first-appearance order, left in the clear so AppViews can index mentions without decoding. Derived from the encoded facets. Absent when there are none or the facets are not encoded.",
+            "items": {
+              "type": "string",
+              "format": "did"
+            }
+          },
+          "quote": {
+            "type": "ref",
+            "ref": "tools.kryphocron.feed.postPublic#strongRef",
+            "description": "Set by the encoding host when `encodedContent` carries the embed: a strong ref to the quoted record of a record or record-with-media embed, left in the clear so AppViews can index quotes without decoding. Derived from the encoded embed. Absent when the post quotes nothing or the embed is not encoded."
+          },
           "createdAt": {
             "type": "string",
             "format": "datetime"

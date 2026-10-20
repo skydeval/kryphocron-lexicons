@@ -9,7 +9,7 @@ convention.
 [Keep a Changelog]: https://keepachangelog.com/en/1.1.0/
 [Semantic Versioning]: https://semver.org/spec/v2.0.0.html
 
-## [0.3.4] — unreleased
+## [0.3.4] — 2026-10-20
 
 ### Added
 - `postPrivate.mediaKinds` (array of strings, known values `image` and `video`, at most two). An encoding host that carries a post's `embed` inside `encodedContent` leaves in the clear the kinds of media the post's own embed carries, so AppViews can filter an author's posts by media without decoding. Optional, derived from the encoded embed, and absent when the post has no media. Link cards, plain quotes and a quoted post's own media do not count; a record-with-media embed counts its own media.

@@ -376,3 +376,20 @@ fn clear_index_fields_validate_and_their_types_apply() {
         "quote must resolve to strongRef: a ref without a cid has to be rejected"
     );
 }
+
+#[test]
+fn media_kinds_validate_and_are_bounded() {
+    let kinds = |ks: &[&str]| {
+        LexValue::from(ks.iter().map(|k| LexValue::from(*k)).collect::<Vec<_>>())
+    };
+    assert!(validates(&post_with(&[("mediaKinds", kinds(&["image"]))])));
+    assert!(validates(&post_with(&[("mediaKinds", kinds(&["image", "video"]))])));
+    assert!(
+        !validates(&post_with(&[("mediaKinds", kinds(&["image", "video", "image"]))])),
+        "mediaKinds must be bounded: a third item has to be rejected"
+    );
+    assert!(
+        !validates(&post_with(&[("mediaKinds", LexValue::from(vec![LexValue::from(1i64)]))])),
+        "mediaKinds items must be strings"
+    );
+}

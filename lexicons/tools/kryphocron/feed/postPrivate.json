@@ -51,6 +51,15 @@
             "ref": "tools.kryphocron.feed.postPublic#strongRef",
             "description": "Set by the encoding host when `encodedContent` carries the embed: a strong ref to the quoted record of a record or record-with-media embed, left in the clear so AppViews can index quotes without decoding. Derived from the encoded embed. Absent when the post quotes nothing or the embed is not encoded."
           },
+          "mediaKinds": {
+            "type": "array",
+            "description": "Set by the encoding host when `encodedContent` carries the embed: the kinds of media the post's own embed carries, each at most once, `image` before `video`, left in the clear so AppViews can filter an author's posts by media without decoding. Images and galleries count as `image`; a video counts as `video` whatever its presentation hint. A record-with-media embed counts its own media. Link cards (GIF links among them), plain quotes and a quoted post's own media do not count. Derived from the encoded embed; the host replaces any value a client sends. Absent when the post has no media or the embed is not encoded.",
+            "maxLength": 2,
+            "items": {
+              "type": "string",
+              "knownValues": ["image", "video"]
+            }
+          },
           "createdAt": {
             "type": "string",
             "format": "datetime"

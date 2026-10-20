@@ -41,14 +41,16 @@ consults an audience list for them.
 
 ### `feed.postPrivate`
 
-A private post. It is never federated, and it is readable only by
-requesters the audience it names admits.
+A private post. The substrate serves it only to requesters the
+audience it names admits. That is access friction, not encryption:
+the record can still reach sync channels such as the firehose.
 
 | Field | |
 | --- | --- |
 | `audienceList` | **Required.** The AT-URI of a `policy.audience` record. Its presence is what makes the post private: a post without an audience is a public post, so use `postPublic`. |
 | `text` | Post text (max 300 graphemes). |
 | `encodedContent`, `encodedContentCodec`, `encodedContentGeneration` | Output of an optional at-rest content codec, used in place of `text`, plus the codec's identifier and a rotation-generation mark. The substrate does not interpret the codec output. |
+| `embedBlobs`, `mentionDids`, `quote` | Set by an encoding host when `encodedContent` carries the embed and facets: the embed's blobs (so the host keeps them), the mentioned DIDs (deduplicated, first-appearance order) and a strong ref to the quoted record. They stay in the clear so AppViews can index mentions and quotes without decoding. Derived from the encoded content; the decoded content is authoritative. |
 | `createdAt` | **Required.** |
 | `reply`, `facets` | As on `postPublic`. |
 | `embed` | One of `#embedImage` (up to 4), `#embedGallery` (up to 20), `#embedVideo`, `#embedExternal`, `#embedRecord`, `#embedRecordWithMedia` (a quoted record plus images, a gallery, a video or a link card). |

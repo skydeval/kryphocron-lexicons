@@ -9,10 +9,16 @@ convention.
 [Keep a Changelog]: https://keepachangelog.com/en/1.1.0/
 [Semantic Versioning]: https://semver.org/spec/v2.0.0.html
 
-## [0.3.2] — unreleased
+## [0.3.2] — 2026-10-19
 
 ### Added
-- `postPrivate.embedBlobs` (array of blobs), `postPrivate.mentionDids` (array of DIDs) and `postPrivate.quote` (`postPublic#strongRef`). An encoding host that carries a post's `facets` and `embed` inside `encodedContent` (aurora-locus #504) leaves these in the clear: the embed's blobs so it keeps them, and the mentioned DIDs and quoted record so AppViews can index mentions and quotes without decoding. All three are optional, derived from the encoded content, and absent when there is nothing to derive.
+- `postPrivate.embedBlobs` (array of blobs), `postPrivate.mentionDids` (array of DIDs) and `postPrivate.quote` (`postPublic#strongRef`). An encoding host that carries a post's `facets` and `embed` inside `encodedContent` leaves these in the clear: the embed's blobs so it keeps them, and the mentioned DIDs and quoted record so AppViews can index mentions and quotes without decoding. All three are optional, derived from the encoded content, and absent when there is nothing to derive.
+
+### Fixed
+- `postPrivate`'s description, the README and `docs/design/lexicon-set.md` no longer say private posts are never federated. A private post can still reach sync channels such as the firehose; the audience gate is access friction, not encryption.
+
+### Note for Rust consumers
+- The generated `postPrivate` `Main` struct gains three fields. Code that constructs it with a struct literal needs updating; deserialization and field access are unaffected.
 
 ## [0.3.1] — 2026-10-15
 

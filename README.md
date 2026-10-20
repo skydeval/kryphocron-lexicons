@@ -38,7 +38,7 @@ record lexicons:
 | --- | --- | --- |
 | `tools.kryphocron.feed.like` | Public | Field-compatible with `app.bsky.feed.like`. |
 | `tools.kryphocron.feed.postPublic` | Public | Field-compatible with `app.bsky.feed.post`. |
-| `tools.kryphocron.feed.postPrivate` | Private | Audience-gated via required `audienceList` reference; never federated. |
+| `tools.kryphocron.feed.postPrivate` | Private | Audience-gated via required `audienceList` reference; access friction, not encryption. |
 | `tools.kryphocron.feed.repost` | Public | Field-compatible with `app.bsky.feed.repost`. |
 | `tools.kryphocron.feed.threadgate` | Public | Thread-level interaction policy. |
 | `tools.kryphocron.graph.block` | Private | Existence is private; consumed by `BlockOracle` outside the normal capability flow. |

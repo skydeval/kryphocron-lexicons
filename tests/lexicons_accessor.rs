@@ -345,3 +345,34 @@ fn self_labels_validate_and_bound_value_length() {
         "selfLabels must resolve: a 129-byte label value has to be rejected"
     );
 }
+
+#[test]
+fn clear_index_fields_validate_and_their_types_apply() {
+    let dids = |ds: &[&str]| {
+        LexValue::from(ds.iter().map(|d| LexValue::from(*d)).collect::<Vec<_>>())
+    };
+    let blobs = LexValue::from(vec![blob("image/jpeg", 1_500_000), blob("video/mp4", 5_000_000)]);
+    assert!(validates(&post_with(&[
+        ("embedBlobs", blobs),
+        ("mentionDids", dids(&["did:plc:z72i7hdynmk6r22z27h6tvur", "did:web:example.com"])),
+        ("quote", strong_ref()),
+    ])));
+
+    let not_blobs = LexValue::from(vec![LexValue::from("not a blob")]);
+    assert!(
+        !validates(&post_with(&[("embedBlobs", not_blobs)])),
+        "embedBlobs items must be blobs"
+    );
+    assert!(
+        !validates(&post_with(&[("mentionDids", dids(&["alice.example.com"]))])),
+        "mentionDids items must be DIDs"
+    );
+    let cidless = obj(&[(
+        "uri",
+        LexValue::from("at://did:plc:z72i7hdynmk6r22z27h6tvur/app.bsky.feed.post/3kquotedpost01"),
+    )]);
+    assert!(
+        !validates(&post_with(&[("quote", cidless)])),
+        "quote must resolve to strongRef: a ref without a cid has to be rejected"
+    );
+}

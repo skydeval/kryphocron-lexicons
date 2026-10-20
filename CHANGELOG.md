@@ -9,6 +9,11 @@ convention.
 [Keep a Changelog]: https://keepachangelog.com/en/1.1.0/
 [Semantic Versioning]: https://semver.org/spec/v2.0.0.html
 
+## [0.3.3] — unreleased
+
+### Fixed
+- `graph.block` and `graph.mute` descriptions, the README and `docs/design/lexicon-set.md` no longer say block and mute records are unfederated or private to their owner. Like any repo record they can reach sync channels such as the firehose, so who blocked or muted whom is observable there.
+
 ## [0.3.2] — 2026-10-19
 
 ### Added

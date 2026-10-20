@@ -1,7 +1,7 @@
 {
   "lexicon": 1,
   "id": "tools.kryphocron.graph.block",
-  "description": "Private-tier block record. The blocker DID is the record's owner; the blocked DID is the subject. Block records are not federated and not publicly readable; existence is private information. Audience-list-exempt (consumed by BlockOracle outside the normal capability flow).",
+  "description": "Private-tier block record. The blocker DID is the record's owner; the blocked DID is the subject. Not confidential: like any repo record, a block can reach sync channels such as the firehose, so who blocked whom is observable there. Audience-list-exempt (consumed by BlockOracle outside the normal capability flow).",
   "defs": {
     "main": {
       "type": "record",

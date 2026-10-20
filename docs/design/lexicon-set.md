@@ -94,9 +94,10 @@ membership: a reply needs both.
 ### `graph.block`, `graph.mute`
 
 `subject` (a DID) and `createdAt`. The record's owner is the one
-blocking or muting. Both are private tier, so nobody can find out who
-has blocked or muted them: the records are not federated and cannot
-be read publicly.
+blocking or muting. Both are private tier, but that does not make
+them confidential: like any repo record they can reach sync channels
+such as the firehose, so who blocked or muted whom is observable
+there.
 
 Whether a block record is visible is separate from how blocks are
 enforced. Blocks are enforced in both directions by kryphocron's

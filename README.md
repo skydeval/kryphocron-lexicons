@@ -41,8 +41,8 @@ record lexicons:
 | `tools.kryphocron.feed.postPrivate` | Private | Audience-gated via required `audienceList` reference; access friction, not encryption. |
 | `tools.kryphocron.feed.repost` | Public | Field-compatible with `app.bsky.feed.repost`. |
 | `tools.kryphocron.feed.threadgate` | Public | Thread-level interaction policy. |
-| `tools.kryphocron.graph.block` | Private | Existence is private; consumed by `BlockOracle` outside the normal capability flow. |
-| `tools.kryphocron.graph.mute` | Private | One-directional, viewer-visible-only. |
+| `tools.kryphocron.graph.block` | Private | Consumed by `BlockOracle` outside the normal capability flow. Reaches the firehose like any repo record. |
+| `tools.kryphocron.graph.mute` | Private | One-directional; consumed by `MuteOracle`. Reaches the firehose like any repo record. |
 | `tools.kryphocron.policy.audience` | Private | The audience-list mechanism itself. |
 
 The Public / Private distinction is enforced structurally at

@@ -9,6 +9,14 @@ convention.
 [Keep a Changelog]: https://keepachangelog.com/en/1.1.0/
 [Semantic Versioning]: https://semver.org/spec/v2.0.0.html
 
+## [0.3.5] — unreleased
+
+### Changed
+- `postPrivate.encodedContent` documents the decoded payload for `laquna/0.2`: the text form (the post's text as UTF-8) or the content form (`0xFF`, then a UTF-8 JSON object `{text, facets?, embed?}`). In the content form, `text`, `facets` and `embed` are absent from the stored record and the clear fields are derived from the decoded content.
+- `postPrivate.encodedContentGeneration` is set by the encoder, which may be the encoding host or the member's client. Readers treat it as asserted, not verified, and treat a mark dated in the future as due for rotation. The lex-sortable requirement stands; laquna marks are `laquna/{unix seconds, zero-padded to 20 digits}/{64 hex}`.
+
+Description-only: the schema and the generated Rust types are unchanged.
+
 ## [0.3.4] — 2026-10-20
 
 ### Added

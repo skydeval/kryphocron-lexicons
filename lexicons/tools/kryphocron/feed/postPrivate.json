@@ -18,7 +18,7 @@
           },
           "encodedContent": {
             "type": "bytes",
-            "description": "Optional codec output for at-rest content transform. When present, replaces the `text` field (XOR — exactly one of the two MUST be present, substrate-enforced per validate_record). Codec interpretation is opaque to the substrate; for laquna, this includes the 32-byte slug inline at the tail. See encodedContentCodec for the codec identifier.",
+            "description": "Optional codec output for at-rest content transform. When present, replaces the `text` field (XOR — exactly one of the two MUST be present, substrate-enforced per validate_record). The codec output itself is opaque to the substrate; for laquna, it includes the 32-byte slug inline at the tail. For `laquna/0.2`, the decoded payload takes one of two forms. Text form: the post's text as UTF-8. Content form: the byte 0xFF, then a UTF-8 JSON object `{text, facets?, embed?}`, where `text` is a string (empty when the post has none) and `facets` and `embed` follow this record's schema, present only when the post has them; 0xFF never starts valid UTF-8, so the two forms cannot be confused. In the content form, `text`, `facets` and `embed` are absent from the stored record, and `embedBlobs`, `mentionDids`, `quote` and `mediaKinds` are derived from the decoded content. See encodedContentCodec for the codec identifier.",
             "maxLength": 1000000
           },
           "encodedContentCodec": {
@@ -28,7 +28,7 @@
           },
           "encodedContentGeneration": {
             "type": "string",
-            "description": "Optional per-record rotation generation mark. Stamped by the substrate from the resolved RotationOracle hint at encode time. Host rewrite-on-rotate jobs select records by `WHERE encodedContentGeneration < current_generation`. Matches the Rust-side RotationGenerationMark(BoundedString<128>) bound. Hosts MUST pick a lex-sortable encoding.",
+            "description": "Optional per-record rotation generation mark, set at encode time by the encoder: the encoding host or the member's client. Readers treat it as asserted by the encoder, not verified, and treat a mark dated in the future as due for rotation. Host rewrite-on-rotate jobs select records by `WHERE encodedContentGeneration < current_generation`. Matches the Rust-side RotationGenerationMark(BoundedString<128>) bound. Encoders MUST pick a lex-sortable encoding; laquna marks are `laquna/{unix seconds, zero-padded to 20 digits}/{64 hex}`.",
             "maxLength": 128
           },
           "embedBlobs": {
